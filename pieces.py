@@ -61,9 +61,14 @@ class Pawn(Piece):
         self.already_moved_once = False
 
         # sets all the moves that the pawn can make in relation to its position. 0 is the pawn's current position. -1 being are squares the piece cannot move to. 1, 2, 3 are all moves that a Pawn could potentially make, but more data is needed to determine whether the move is currently possible.
-        self.set_available_moves([[-1, 2, -1],
-                                  [3, 1, 3],
-                                  [-1, 0, -1]])
+        moves = [[-1, 2, -1],
+                 [3, 1, 3],
+                 [-1, 0, -1]]
+
+        if colour == 1:
+            self.set_available_moves(moves)
+        else:
+            self.set_available_moves(moves[::-1])
 
 
 class Knight(Piece):
