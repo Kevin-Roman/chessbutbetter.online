@@ -1,18 +1,33 @@
 class Piece:
     def __init__(self):
+        # indicates whether the piece is able to move straight in any direction
         self.straight = False
+        # indicates whether the piece is able to move diagonally in any direction
         self.diagonal = False
 
+        self.already_moved_once = False
         self.available_moves = []
 
         self.name = " "
         self.colour = 0
         self.value = 0
 
+    def get_straight(self):
+        return self.straight
+
+    def set_straight(self, straight):
+        self.straight = straight
+
+    def get_diagonal(self):
+        return self.diagonal
+
+    def set_diagonal(self, diagonal):
+        self.diagonal = diagonal
+
     def get_available_moves(self):
         return self.available_moves
 
-    def set_available_moves(self, available_moves):
+    def set_available_moves(self, available_moves=[]):
         self.available_moves = available_moves
 
     def get_all_moves(self):
@@ -50,7 +65,7 @@ class Piece:
         return f"{colour[0]}{name[0]}"
 
 
-# Create a Pawn subclass which inherits the methods from the Piece class.
+# Create a Pawn subclass which inherits the Piece class.
 class Pawn(Piece):
     def __init__(self, colour):
         super().__init__()  # inherits all the attributes from from the Piece class without needing to explicitly refer to the Superclass
@@ -58,7 +73,6 @@ class Pawn(Piece):
         self.set_name("Pawn")
         self.set_colour(colour)
         self.set_value(1)
-        self.already_moved_once = False
 
         # sets all the moves that the pawn can make in relation to its position. 0 is the pawn's current position. -1 being are squares the piece cannot move to. 1, 2, 3 are all moves that a Pawn could potentially make, but more data is needed to determine whether the move is currently possible.
         moves = [[-1, 2, -1],
@@ -68,6 +82,7 @@ class Pawn(Piece):
         if colour == 1:
             self.set_available_moves(moves)
         else:
+            # reverses the order of the lists inside the moves list
             self.set_available_moves(moves[::-1])
 
 
@@ -78,7 +93,6 @@ class Knight(Piece):
         self.set_name("Knight")
         self.set_colour(colour)
         self.set_value(3)
-        self.already_moved_once = False
 
         self.set_available_moves([[-1, 1, -1, 1, -1],
                                   [1, -1, -1, -1, 1],
@@ -94,7 +108,7 @@ class Bishop(Piece):
         self.set_name("Bishop")
         self.set_colour(colour)
         self.set_value(3)
-        self.already_moved_once = False
+        self.set_diagonal(True)
 
 
 class Rook(Piece):
@@ -104,7 +118,7 @@ class Rook(Piece):
         self.set_name("Rook")
         self.set_colour(colour)
         self.set_value(5)
-        self.already_moved_once = False
+        self.set_straight(True)
 
 
 class Queen(Piece):
@@ -114,7 +128,8 @@ class Queen(Piece):
         self.set_name("Queen")
         self.set_colour(colour)
         self.set_value(9)
-        self.already_moved_once = False
+        self.set_straight(True)
+        self.set_diagonal(True)
 
 
 class King(Piece):
@@ -124,9 +139,32 @@ class King(Piece):
         self.set_name("King")
         self.set_colour(colour)
         self.set_value(100)
-        self.already_moved_once = False
 
         # A king move to a square with a 4 is only possible due to castling
         self.set_available_moves([[-1, 1, 1, 1, -1],
                                   [4, 1, 0, 1, 4],
                                   [-1, 1, 1, 1, -1]])
+
+
+if __name__ == "__main__":
+    white_pawn = Pawn(0)
+    white_bishop = Bishop(0)
+    white_knight = Knight(0)
+    white_rook = Rook(0)
+    white_queen = Queen(0)
+    white_king = King(0)
+
+    black_pawn = Pawn(1)
+    black_bishop = Bishop(1)
+    black_knight = Knight(1)
+    black_rook = Rook(1)
+    black_queen = Queen(1)
+    black_king = King(1)
+
+    all_pieces = [
+        white_pawn, white_bishop, white_knight, white_rook, white_queen,
+        white_king, black_pawn, black_bishop, black_knight, black_rook, black_queen, black_king]
+
+    for piece in all_pieces:
+        print(
+            piece.get_name(), piece.get_colour(), piece.get_value(), piece.get_all_moves(), piece, "\n")
