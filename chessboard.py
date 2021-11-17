@@ -1,4 +1,5 @@
-class Chessboard:  # create the chessboard attribute to the class
+# Stores all the information for each instance of a chess game
+class Chessboard:
     def __init__(self):
         self.chessboard = [
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
@@ -7,36 +8,37 @@ class Chessboard:  # create the chessboard attribute to the class
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
-            ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
-            ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"]]
-        # creates the chessboard, with black pieces at the bottom, and black on the top. E.g. wR means white Rook. 0 means empty sqaure. The rest of the squares are just temporary placeholder. I will add different pieces to the chessboard later.
+            ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+            ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"]]
 
-    # returns a visual string representation of the chessboard when instance is asked for the string version.
+    # Takes in two coordinates, moves the piece from the previous square to the new_square and then sets the previous square value to 0
+    def move(self, previous_square, new_square):
+        print(previous_square, new_square)
+
+        piece = self.chessboard[previous_square[1]][previous_square[0]]
+        self.chessboard[previous_square[1]][previous_square[0]] = 0
+        self.chessboard[new_square[1]][new_square[0]] = piece
+
+    # returns a string representation of the chessboard
     def __str__(self):
         str_chessboard = ""
         for x in range(8):
+            str_chessboard += f"{x+1}  "
+
             for y in range(8):
                 piece_in_square = str(self.chessboard[x][y])
-                # retrieves the value in the specific square
+
                 str_chessboard += f'{piece_in_square}{" "*(3-len(piece_in_square))}'
-                # adds the value of the piece_in_square as well as a specific number of empty spaces following it (depending on how long the name of the piece is) so that every square has an equal padding around it
-            str_chessboard += "\n"  # indicates new line for each row in the chessboard
+
+            str_chessboard += "\n"
+
+        str_chessboard += "   a  b  c  d  e  f  g  h\n"
 
         return str_chessboard
 
-    # moves the piece from the current square to the next square, and sets the value of the current square to 0
-    def move(self, current_square, next_square):
-        print(current_square, next_square)
-        # gets the element in the current square
-        piece = self.chessboard[current_square[1]][current_square[0]]
-        # sets the current square to the value of 0 (as the chess piece has moved from there so it is now empty.)
-        self.chessboard[current_square[1]][current_square[0]] = 0
-        # sets the next square element to piece variable (the piece that is being moved)
-        self.chessboard[next_square[1]][next_square[0]] = piece
-
-    @staticmethod  # built in decorator that defines a static method in the class in python
+    # converts notation format to coordinate format (e.g. from "a1" to (0,0))
+    @staticmethod
     def notation_to_coord(notation):
-        # turns each character in the notation string to an element of a list
         x, y = list(notation)
 
         x_axis = {"a": 0, "b": 1, "c": 2, "d": 3,
@@ -44,6 +46,7 @@ class Chessboard:  # create the chessboard attribute to the class
 
         return (x_axis[x], int(y)-1)
 
+    # converts notation format to coordinate format (e.g. from (0,0)  to "a1")
     @staticmethod
     def coord_to_notation(coord):
         x, y = list(coord)
@@ -51,15 +54,16 @@ class Chessboard:  # create the chessboard attribute to the class
         x_axis = {0: "a", 1: "b", 2: "c", 3: "d",
                   4: "e", 5: "f", 6: "g", 7: "h"}
 
-        return (x_axis[x], int(y)+1)
+        return (x_axis[x], y+1)
 
 
-if __name__ == "__main__":  # Only runs this code if this file is not imported
-    # Creates an instance of the Chessboard class and store it in the chess variable
+if __name__ == "__main__":
+
     chess = Chessboard()
+
     print(chess)
 
-    chess.move((0, 1), (3, 0))  # move piece from index [0][1] with [3][0]
+    chess.move((0, 0), (4, 3))
     print(chess)
 
     current_square = chess.notation_to_coord("f2")
