@@ -1,55 +1,62 @@
+# Piece superclass and all the different pieces subclasses
+
+# Class for the piece type
 class Piece:
     def __init__(self):
-        # indicates whether the piece is able to move straight in any direction
-        self.straight = False
-        # indicates whether the piece is able to move diagonally in any direction
-        self.diagonal = False
+        self._straight = False
+        self._diagonal = False
 
-        self.already_moved_once = False
-        self.available_moves = []
+        self._already_moved = False
+        self._available_moves = []
 
-        self.name = " "
-        self.colour = 0
-        self.value = 0
+        self._name = " "
+        self._colour = 0  # 0 = white, 1 = black
+        self._value = 0
 
     def get_straight(self):
-        return self.straight
+        return self._straight
 
     def set_straight(self, straight):
-        self.straight = straight
+        self._straight = straight
 
     def get_diagonal(self):
-        return self.diagonal
+        return self._diagonal
 
     def set_diagonal(self, diagonal):
-        self.diagonal = diagonal
+        self._diagonal = diagonal
 
     def get_available_moves(self):
-        return self.available_moves
+        return self._available_moves
 
-    def set_available_moves(self, available_moves=[]):
-        self.available_moves = available_moves
+    def set_available_moves(self, available_moves):
+        self._available_moves = available_moves
 
     def get_all_moves(self):
-        return [self.straight, self.diagonal, self.available_moves]
+        return [self._straight, self._diagonal, self._available_moves]
+
+    def get_already_moved(self):
+        return self._already_moved
+
+    def set_already_moved(self, already_moved):
+        self._already_moved = already_moved
 
     def get_name(self):
-        return self.name
+        return self._name
 
     def set_name(self, name):
-        self.name = name
+        self._name = name
 
     def get_colour(self):
-        return self.colour
+        return self._colour
 
     def set_colour(self, colour):
-        self.colour = colour
+        self._colour = colour
 
     def get_value(self):
-        return self.value
+        return self._value
 
     def set_value(self, value):
-        self.value = value
+        self._value = value
 
     def __str__(self):
         if self.get_colour() == 1:
@@ -59,22 +66,22 @@ class Piece:
 
         name = self.get_name()
         if name == "Knight":
-            name = "N"  # As King also starts with the letter K, N is the convention for the knight
+            name = "N"
 
-        # returns a string representation of the chess piece
         return f"{colour[0]}{name[0]}"
 
 
-# Create a Pawn subclass which inherits the Piece class.
+# Pawn subclass which inherits all the members of the Piece class.
 class Pawn(Piece):
     def __init__(self, colour):
-        super().__init__()  # inherits all the attributes from from the Piece class without needing to explicitly refer to the Superclass
+        super().__init__()
 
         self.set_name("Pawn")
         self.set_colour(colour)
         self.set_value(1)
 
-        # sets all the moves that the pawn can make in relation to its position. 0 is the pawn's current position. -1 being are squares the piece cannot move to. 1, 2, 3 are all moves that a Pawn could potentially make, but more data is needed to determine whether the move is currently possible.
+        self._double_step = False
+
         moves = [[-1, 2, -1],
                  [3, 1, 3],
                  [-1, 0, -1]]
@@ -82,10 +89,16 @@ class Pawn(Piece):
         if colour == 1:
             self.set_available_moves(moves)
         else:
-            # reverses the order of the lists inside the moves list
             self.set_available_moves(moves[::-1])
 
+    def get_double_step(self):
+        return self._double_step
 
+    def set_double_step(self, double_step):
+        self._double_step = double_step
+
+
+# Knight subclass which inherits all the members of the Piece class.
 class Knight(Piece):
     def __init__(self, colour):
         super().__init__()
@@ -101,6 +114,7 @@ class Knight(Piece):
                                   [-1, 1, -1, 1, -1]])
 
 
+# Bishop subclass which inherits all the members of the Piece class.
 class Bishop(Piece):
     def __init__(self, colour):
         super().__init__()
@@ -111,6 +125,7 @@ class Bishop(Piece):
         self.set_diagonal(True)
 
 
+# Rook subclass which inherits all the members of the Piece class.
 class Rook(Piece):
     def __init__(self, colour):
         super().__init__()
@@ -121,6 +136,7 @@ class Rook(Piece):
         self.set_straight(True)
 
 
+# Queen subclass which inherits all the members of the Piece class.
 class Queen(Piece):
     def __init__(self, colour):
         super().__init__()
@@ -132,6 +148,7 @@ class Queen(Piece):
         self.set_diagonal(True)
 
 
+# King subclass which inherits all the members of the Piece class.
 class King(Piece):
     def __init__(self, colour):
         super().__init__()
