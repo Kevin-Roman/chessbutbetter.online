@@ -1,15 +1,26 @@
+from pieces import Pawn, Knight, Bishop, Rook, Queen, King
+
+
 # Stores all the information for each instance of a chess game
 class Chessboard:
     def __init__(self):
         self.chessboard = [
-            ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"],
-            ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
+            [Rook(0), Knight(0), Bishop(0), Queen(0),
+             King(0), Bishop(0), Knight(0), Rook(0)],
+            [Pawn(0), Pawn(0), Pawn(0), Pawn(0), Pawn(0),
+             Pawn(0), Pawn(0), Pawn(0)],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
-            ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-            ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"]]
+            [Pawn(1), Pawn(1), Pawn(1), Pawn(1), Pawn(1),
+             Pawn(1), Pawn(1), Pawn(1)],
+            [Rook(1), Knight(1), Bishop(1), Queen(1),
+             King(1), Bishop(1), Knight(1), Rook(1)]]
+
+    # Gets the element of the chessboad with the specific coordinate
+    def get_square(self, coord):
+        return self.chessboard[coord[1]][coord[0]]
 
     # Takes in two coordinates, moves the piece from the previous square to the new_square and then sets the previous square value to 0
     def move(self, previous_square, new_square):
@@ -19,7 +30,144 @@ class Chessboard:
         self.chessboard[previous_square[1]][previous_square[0]] = 0
         self.chessboard[new_square[1]][new_square[0]] = piece
 
-    # returns a string representation of the chessboard
+    # Returns a list of legal specific moves the pawn, knight, and king can make
+
+    def legal_specific_move(self, coord):
+        square1 = self.get_square(coord)
+        available_moves = square1.get_available_moves()
+        x_square1, y_square1 = coord
+        x_moves_center, y_moves_center = (0, 0)
+
+        legal_moves = []
+
+        for num_row, row in enumerate(available_moves):
+            for num_column, item in enumerate(row):
+                if item == 0:
+                    x_moves_center = num_column
+                    y_moves_center = num_row
+
+        x_diff = x_square1 - x_moves_center  # swap
+        y_diff = y_square1 - y_moves_center
+        # diff = (x_dix_square1 - moves_center_xff, y_square1 - moves_center_y)
+
+        for num_row, row in enumerate(available_moves):
+            for num_column, value in enumerate(row):
+                coord2 = (num_column + x_diff, num_row+y_diff)
+
+                if value != -1 and 7 >= (coord2[0]) >= 0 and 7 >= (coord2[1]) >= 0:
+                    square2 = self.get_square(coord2)
+
+                    legal = False
+
+                    match value:
+                        case 1:
+                            legal = self.case_1(square1, square2)
+
+                        case 2:
+                            legal = self.can_pawn_double_step(square1, coord)
+
+                        case 3:
+                            legal = self.can_pawn_capture(
+                                square1, square2, coord2)
+
+                        case 4:
+                            legal = self.can_castle(square1, coord)
+
+                    if legal:
+                        legal_moves.append((coord2, value))
+
+        return legal_moves
+
+    # Checks if a piece can do a 'value 1' move (knight move, king single square move, and pawn single move forwards)
+    @staticmethod
+    def case_1(square1, square2):
+        if square1.get_name() == "Pawn" and square2 == 0:
+            return True
+
+        if square2 == 0:
+            return True
+
+        if square1.get_colour() != square2.get_colour():
+            return True
+
+        return False
+
+    # Checks if a pawn can do a double step move
+    def can_pawn_double_step(self, square, coord):
+        x, y = coord
+        colour = square.get_colour()
+
+        if square.get_already_moved():
+            return False
+
+        if colour == 0:
+            sign = 1
+        else:
+            sign = -1
+
+        for i in range(1, 3):
+            if self.get_square((x, y+(sign*i))) != 0:
+                return False
+
+        return True
+
+    # Checks if a pawn can capture a piece
+    def can_pawn_capture(self, square1, square2, coord2):
+        if square2 != 0:
+            if square1.get_colour() != square2.get_colour():
+                return True
+
+            return self.can_enpassant(square2, coord2)
+
+        return False
+
+    # check if a pawn can do the 'en passant' move
+    def can_enpassant(self, square, coord2):
+        colour = square.get_colour()
+        x, y = coord2
+
+        # swap
+        if colour == 0:
+            i = -1
+        else:
+            i = 1
+
+        under_square = self.get_square((x+i, y))
+        if under_square != 0:
+            if under_square.get_name() == "Pawn" and under_square.get_colour() != colour:
+                if under_square.get_double_step():
+                    return True
+
+        # TO-DO: check the if the enemy double step was the latest move
+
+        return False
+
+    # Checks if King can castle
+    def can_castle(self, square, coord):
+        x, y = coord
+
+        if not square.get_already_moved():
+            if x < 4:
+                for i in range(1, x+1):
+                    if self.get_square((x-i, y)) != 0:
+                        return False
+
+                rook = self.get_square((0, y))
+
+                if not rook.get_already_moved():
+                    return True
+            else:
+                for i in range(1, 8-x):
+                    if self.get_square((x+i, y)) != 0:
+                        return False
+
+                rook = self.get_square((7, y))
+
+                if not rook.get_already_moved():
+                    return True
+
+        return False
+
     def __str__(self):
         str_chessboard = ""
         for x in range(8):
@@ -54,7 +202,7 @@ class Chessboard:
         x_axis = {0: "a", 1: "b", 2: "c", 3: "d",
                   4: "e", 5: "f", 6: "g", 7: "h"}
 
-        return (x_axis[x], y+1)
+        return x_axis[x] + str(y+1)
 
 
 if __name__ == "__main__":
@@ -63,6 +211,7 @@ if __name__ == "__main__":
 
     print(chess)
 
+    """
     chess.move((0, 0), (4, 3))
     print(chess)
 
@@ -70,3 +219,13 @@ if __name__ == "__main__":
     next_square = chess.notation_to_coord("d5")
     chess.move(current_square, next_square)
     print(chess)
+    """
+
+    for num_row, row in enumerate(chess.chessboard):
+        for num_column, square in enumerate(row):
+            coord = (num_column, num_row)
+            if square != 0:
+                legal_moves = [chess.coord_to_notation(
+                    i) for i, j in chess.legal_specific_move(coord)]
+
+                print(f"{square} {legal_moves}")
