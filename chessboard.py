@@ -30,8 +30,44 @@ class Chessboard:
         self.chessboard[previous_square[1]][previous_square[0]] = 0
         self.chessboard[new_square[1]][new_square[0]] = piece
 
-    # Returns a list of legal specific moves the pawn, knight, and king can make
+    # Returns a list of legal moves that the bishop, rook, or queen can make
+    def legal_directional_move(self, coord):
+        square1 = self.get_square(coord)
+        x, y = coord
+        straight, diagonally, _ = square1.get_all_moves()
+        legal_moves = []
 
+        direction_signs = []
+
+        if straight:
+            direction_signs.extend([(1, 0), (-1, 0), (0, 1), (0, -1)])
+
+        if diagonally:
+            direction_signs.extend([(1, 1), (1, -1), (-1, 1), (-1, -1)])
+
+        for directions in direction_signs:
+            x, y = coord
+            x += 1 * directions[0]
+            y += 1 * directions[1]
+
+            while 0 <= x <= 7 and 0 <= y <= 7:
+                coord2 = (x, y)
+                square2 = self.get_square(coord2)
+
+                if square2 == 0:
+                    legal_moves.append((coord2, None))
+                else:
+                    if square1.get_colour() != square2.get_colour():
+                        legal_moves.append((coord2, None))
+
+                    break
+
+                x += 1 * directions[0]
+                y += 1 * directions[1]
+
+        return legal_moves
+
+    # Returns a list of legal specific moves the pawn, knight, and king can make
     def legal_specific_move(self, coord):
         square1 = self.get_square(coord)
         available_moves = square1.get_available_moves()
@@ -148,7 +184,7 @@ class Chessboard:
 
         if not square.get_already_moved():
             if x < 4:
-                for i in range(1, x+1):
+                for i in range(1, x):
                     if self.get_square((x-i, y)) != 0:
                         return False
 
@@ -157,7 +193,7 @@ class Chessboard:
                 if not rook.get_already_moved():
                     return True
             else:
-                for i in range(1, 8-x):
+                for i in range(1, 7-x):
                     if self.get_square((x+i, y)) != 0:
                         return False
 
@@ -214,18 +250,18 @@ if __name__ == "__main__":
     """
     chess.move((0, 0), (4, 3))
     print(chess)
+    """
 
-    current_square = chess.notation_to_coord("f2")
+    current_square = chess.notation_to_coord("d1")
     next_square = chess.notation_to_coord("d5")
     chess.move(current_square, next_square)
     print(chess)
-    """
 
     for num_row, row in enumerate(chess.chessboard):
         for num_column, square in enumerate(row):
             coord = (num_column, num_row)
             if square != 0:
                 legal_moves = [chess.coord_to_notation(
-                    i) for i, j in chess.legal_specific_move(coord)]
+                    i) for i, j in chess.legal_directional_move(coord)]
 
                 print(f"{square} {legal_moves}")
