@@ -1,3 +1,4 @@
+import copy
 from pieces import Pawn, Knight, Bishop, Rook, Queen, King
 
 
@@ -24,11 +25,89 @@ class Chessboard:
 
     # Takes in two coordinates, moves the piece from the previous square to the new_square and then sets the previous square value to 0
     def move(self, previous_square, new_square):
-        print(previous_square, new_square)
+        # print(previous_square, new_square)
 
         piece = self.chessboard[previous_square[1]][previous_square[0]]
         self.chessboard[previous_square[1]][previous_square[0]] = 0
         self.chessboard[new_square[1]][new_square[0]] = piece
+
+    # Moves a piece to a different square, and takes into consideration special moves such as enpassant and castling
+    def move_and_special_moves(self, coord1, coord2, special_move):
+        colour = self.get_square(coord1).get_colour()
+
+        self.move(coord1, coord2)
+
+        x2, y2 = coord2
+
+        # en passant
+        if special_move == 3:
+            if colour == 0:
+                self.chessboard[y2 - 1][x2] = 0
+
+            elif colour == 1:
+                self.chessboard[y2 + 1][x2] = 0
+
+        # castling
+        elif special_move == 4:
+            if x2 < 4:
+                self.move((0, y2), (x2+1, y2))
+
+            else:
+                self.move((7, y2), (x2-1, y2))
+
+    # returns all the legal moves a piece can make and takes into consideration self discovered checks
+    def get_all_legal_moves(self, coord1):
+        piece1 = self.get_square(coord1)
+
+        legal_moves = []
+
+        if piece1 != 0:
+            legal_moves.extend(self.legal_specific_move(coord1))
+            legal_moves.extend(self.legal_directional_move(coord1))
+
+            legal_moves = self.remove_checks(coord1, legal_moves)
+
+        return legal_moves
+
+    # Removes the moves that would lead to a self discovered check
+    def remove_checks(self, coord1, legal_moves):
+        legal_moves_without_checks = []
+        colour = self.get_square(coord1).get_colour()
+
+        if colour == 0:
+            initial = "w"
+        else:
+            initial = "b"
+
+        original_chessboard = copy.deepcopy(self.chessboard)
+
+        for coord2, special_move in legal_moves:
+            attacked_squares = []
+
+            self.move_and_special_moves(coord1, coord2, special_move)
+
+            for y, row in enumerate(self.chessboard):
+                for x, square in enumerate(row):
+                    if square != 0 and str(square)[0] != initial:
+                        attacked_squares.extend(
+                            self.legal_specific_move((x, y)))
+                        attacked_squares.extend(
+                            self.legal_directional_move((x, y)))
+
+            attacked_squares = set(attacked_squares)
+
+            for y, row in enumerate(self.chessboard):
+                for x, square in enumerate(row):
+                    if str(square) == initial+"K":
+                        king_coordinate = (x, y)
+                        break
+
+            if king_coordinate not in attacked_squares:
+                legal_moves_without_checks.append(coord2)
+
+            self.chessboard = copy.deepcopy(original_chessboard)
+
+        return legal_moves_without_checks
 
     # Returns a list of legal moves that the bishop, rook, or queen can make
     def legal_directional_move(self, coord):
@@ -82,9 +161,8 @@ class Chessboard:
                     x_moves_center = num_column
                     y_moves_center = num_row
 
-        x_diff = x_square1 - x_moves_center  # swap
+        x_diff = x_square1 - x_moves_center
         y_diff = y_square1 - y_moves_center
-        # diff = (x_dix_square1 - moves_center_xff, y_square1 - moves_center_y)
 
         for num_row, row in enumerate(available_moves):
             for num_column, value in enumerate(row):
@@ -162,7 +240,6 @@ class Chessboard:
         colour = square.get_colour()
         x, y = coord2
 
-        # swap
         if colour == 0:
             i = -1
         else:
@@ -245,23 +322,24 @@ if __name__ == "__main__":
 
     chess = Chessboard()
 
-    print(chess)
+    # print(chess)
 
-    """
-    chess.move((0, 0), (4, 3))
-    print(chess)
-    """
+    # chess.move((0, 0), (4, 3))
+    # print(chess)
 
-    current_square = chess.notation_to_coord("d1")
-    next_square = chess.notation_to_coord("d5")
-    chess.move(current_square, next_square)
+    # current_square = chess.notation_to_coord("d1")
+    # next_square = chess.notation_to_coord("d5")
+    chess.move(chess.notation_to_coord("d1"), chess.notation_to_coord("e4"))
+    chess.move(chess.notation_to_coord("e2"), chess.notation_to_coord("f3"))
+    chess.move(chess.notation_to_coord("a8"), chess.notation_to_coord("e6"))
     print(chess)
 
     for num_row, row in enumerate(chess.chessboard):
-        for num_column, square in enumerate(row):
+        for num_column, _ in enumerate(row):
             coord = (num_column, num_row)
+            square = chess.get_square(coord)
             if square != 0:
-                legal_moves = [chess.coord_to_notation(
-                    i) for i, j in chess.legal_directional_move(coord)]
+                # print(coord, square)
+                legal_moves = chess.get_all_legal_moves(coord)
 
                 print(f"{square} {legal_moves}")
