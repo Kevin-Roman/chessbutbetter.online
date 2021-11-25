@@ -88,7 +88,7 @@ class Chessboard:
 
             for y, row in enumerate(self.chessboard):
                 for x, square in enumerate(row):
-                    if square != 0 and str(square)[0] != initial:
+                    if square != 0 and square.get_colour() != colour:
                         attacked_squares.extend(
                             self.legal_specific_move((x, y)))
                         attacked_squares.extend(
@@ -102,7 +102,7 @@ class Chessboard:
                         king_coordinate = (x, y)
                         break
 
-            if king_coordinate not in attacked_squares:
+            if king_coordinate not in [attacked_square[0] for attacked_square in attacked_squares]:
                 legal_moves_without_checks.append(coord2)
 
             self.chessboard = copy.deepcopy(original_chessboard)
