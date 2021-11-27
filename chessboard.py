@@ -19,9 +19,20 @@ class Chessboard:
             [Rook(1), Knight(1), Bishop(1), Queen(1),
              King(1), Bishop(1), Knight(1), Rook(1)]]
 
+        self._history = []
+
     # Gets the element of the chessboad with the specific coordinate
     def get_square(self, coord):
         return self.chessboard[coord[1]][coord[0]]
+
+    def get_history(self):
+        return self._history
+
+    def append_history(self, previous_square, new_square):
+        notation1 = self.coord_to_notation(previous_square)
+        notation2 = self.coord_to_notation(new_square)
+
+        self._history.append({notation1} + {notation2})
 
     # Takes in two coordinates, moves the piece from the previous square to the new_square and then sets the previous square value to 0
     def move(self, previous_square, new_square):
@@ -237,6 +248,7 @@ class Chessboard:
 
     # check if a pawn can do the 'en passant' move
     def can_enpassant(self, square, coord2):
+        history = self.get_history()
         colour = square.get_colour()
         x, y = coord2
 
@@ -245,13 +257,16 @@ class Chessboard:
         else:
             i = 1
 
-        under_square = self.get_square((x+i, y))
+        last_move = (history or [None])[-1]
+        under_square = self.get_square((x, y+i))
+
+        if last_move != self.coord_to_notation((x, y+3*i)) + self.coord_to_notation((x, y+i)):
+            return False
+
         if under_square != 0:
             if under_square.get_name() == "Pawn" and under_square.get_colour() != colour:
                 if under_square.get_double_step():
                     return True
-
-        # TO-DO: check the if the enemy double step was the latest move
 
         return False
 
@@ -329,7 +344,7 @@ if __name__ == "__main__":
 
     # current_square = chess.notation_to_coord("d1")
     # next_square = chess.notation_to_coord("d5")
-    chess.move(chess.notation_to_coord("d1"), chess.notation_to_coord("e4"))
+    chess.move(chess.notation_to_coord("d1"), chess.notation_to_coord("d4"))
     chess.move(chess.notation_to_coord("e2"), chess.notation_to_coord("f3"))
     chess.move(chess.notation_to_coord("a8"), chess.notation_to_coord("e6"))
     print(chess)
