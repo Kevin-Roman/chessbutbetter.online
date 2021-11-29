@@ -120,7 +120,46 @@ class Chessboard:
 
         return legal_moves_without_checks
 
-    # Returns a list of legal moves that the bishop, rook, or queen can make
+    # Checks whether the current player to move is in a checkmate or a draw
+    def is_checkmate_or_draw(self, turn):
+        all_legal_moves = []
+
+        for num_row, row in enumerate(self.chessboard):
+            for num_column, _ in enumerate(row):
+                coord = (num_column, num_row)
+                square = self.get_square(coord)
+                if square != 0 and square.get_colour() == turn:
+                    all_legal_moves.append(
+                        self.get_all_legal_moves(coord))
+
+        # Determines whether it is a checkmate or a stalemate
+        if len(all_legal_moves) == 0:
+            attacked_squares = []
+
+            for y, row in enumerate(self.chessboard):
+                for x, square in enumerate(row):
+                    if square != 0 and square.get_colour() != turn:
+                        attacked_squares.extend(
+                            self.legal_specific_move((x, y)))
+                        attacked_squares.extend(
+                            self.legal_directional_move((x, y)))
+
+            attacked_squares = set(attacked_squares)
+
+            for y, row in enumerate(self.chessboard):
+                for x, square in enumerate(row):
+                    if square != 0 and square.get_colour() == turn and square[1] == "K":
+                        king_coordinate = (x, y)
+                        break
+
+            if king_coordinate in [attacked_square[0] for attacked_square in attacked_squares]:
+                return "checkmate"
+
+            # Stalemate
+            return "draw"
+
+        return False
+
     def legal_directional_move(self, coord):
         square1 = self.get_square(coord)
         x, y = coord
