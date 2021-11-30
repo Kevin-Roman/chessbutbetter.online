@@ -66,6 +66,16 @@ class Chessboard:
             else:
                 self.move((7, y2), (x2-1, y2))
 
+        # promotion
+        if self.get_square(coord1) != 0 and self.get_square(coord1).get_name() == "Pawn":
+            if colour == 0 and y2 == 7:
+                self.chessboard[y2][x2] = Queen(0)
+                self.chessboard[y2][x2].set_already_moved(True)
+
+            elif colour == 1 and y2 == 0:
+                self.chessboard[y2][x2] = Queen(1)
+                self.chessboard[y2][x2].set_already_moved(True)
+
     # returns all the legal moves a piece can make and takes into consideration self discovered checks
     def get_all_legal_moves(self, coord1):
         piece1 = self.get_square(coord1)
