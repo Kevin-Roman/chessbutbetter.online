@@ -80,8 +80,6 @@ class Pawn(Piece):
         self.set_colour(colour)
         self.set_value(1)
 
-        self._double_step = False
-
         moves = [[-1, 2, -1],
                  [3, 1, 3],
                  [-1, 0, -1]]
@@ -90,12 +88,6 @@ class Pawn(Piece):
             self.set_available_moves(moves)
         else:
             self.set_available_moves(moves[::-1])
-
-    def get_double_step(self):
-        return self._double_step
-
-    def set_double_step(self, double_step):
-        self._double_step = double_step
 
 
 # Knight subclass which inherits all the members of the Piece class.

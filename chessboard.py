@@ -2,7 +2,7 @@ import copy
 from pieces import Pawn, Knight, Bishop, Rook, Queen, King
 
 
-# Stores all the information for each instance of a chess game
+# Stores all the information for each instance of a chessboard
 class Chessboard:
     def __init__(self):
         self.chessboard = [
@@ -32,7 +32,7 @@ class Chessboard:
         notation1 = self.coord_to_notation(previous_square)
         notation2 = self.coord_to_notation(new_square)
 
-        self._history.append({notation1} + {notation2})
+        self._history.append(notation1 + notation2)
 
     # Takes in two coordinates, moves the piece from the previous square to the new_square and then sets the previous square value to 0
     def move(self, previous_square, new_square):
@@ -124,7 +124,7 @@ class Chessboard:
                         break
 
             if king_coordinate not in [attacked_square[0] for attacked_square in attacked_squares]:
-                legal_moves_without_checks.append(coord2)
+                legal_moves_without_checks.append((coord2, special_move))
 
             self.chessboard = copy.deepcopy(original_chessboard)
 
@@ -291,9 +291,7 @@ class Chessboard:
             if square1.get_colour() != square2.get_colour():
                 return True
 
-            return self.can_enpassant(square2, coord2)
-
-        return False
+        return self.can_enpassant(square1, coord2)
 
     # check if a pawn can do the 'en passant' move
     def can_enpassant(self, square, coord2):
@@ -307,15 +305,15 @@ class Chessboard:
             i = 1
 
         last_move = (history or [None])[-1]
-        under_square = self.get_square((x, y+i))
 
-        if last_move != self.coord_to_notation((x, y+3*i)) + self.coord_to_notation((x, y+i)):
+        if last_move != self.coord_to_notation((x, y-i)) + self.coord_to_notation((x, y+i)):
             return False
+
+        under_square = self.get_square((x, y+i))
 
         if under_square != 0:
             if under_square.get_name() == "Pawn" and under_square.get_colour() != colour:
-                if under_square.get_double_step():
-                    return True
+                return True
 
         return False
 
@@ -331,7 +329,7 @@ class Chessboard:
 
                 rook = self.get_square((0, y))
 
-                if not rook.get_already_moved():
+                if rook != 0 and not rook.get_already_moved():
                     return True
             else:
                 for i in range(1, 7-x):
@@ -340,7 +338,7 @@ class Chessboard:
 
                 rook = self.get_square((7, y))
 
-                if not rook.get_already_moved():
+                if rook != 0 and not rook.get_already_moved():
                     return True
 
         return False
@@ -386,18 +384,28 @@ if __name__ == "__main__":
 
     chess = Chessboard()
 
-    # print(chess)
+    chess.move_and_special_moves(chess.notation_to_coord(
+        "f8"), chess.notation_to_coord("f6"), None)
+    chess.append_history(chess.notation_to_coord("f8"),
+                         chess.notation_to_coord("f6"))
 
-    # chess.move((0, 0), (4, 3))
-    # print(chess)
+    chess.move_and_special_moves(chess.notation_to_coord(
+        "g8"), chess.notation_to_coord("g6"), None)
+    chess.append_history(chess.notation_to_coord("g6"),
+                         chess.notation_to_coord("g6"))
 
-    # current_square = chess.notation_to_coord("d1")
-    # next_square = chess.notation_to_coord("d5")
-    chess.move(chess.notation_to_coord("d1"), chess.notation_to_coord("d4"))
-    chess.move(chess.notation_to_coord("e2"), chess.notation_to_coord("f3"))
-    chess.move(chess.notation_to_coord("a8"), chess.notation_to_coord("e6"))
+    # prints out all the legal moves the wP on d5 can move to
+    print([chess.coord_to_notation(legal_move[0])
+          for legal_move in chess.get_all_legal_moves(chess.notation_to_coord("d5"))])
+
     print(chess)
 
+    chess.move_and_special_moves(chess.notation_to_coord(
+        "d5"), chess.notation_to_coord("e6"), 3)
+
+    print(chess)
+
+    """
     for num_row, row in enumerate(chess.chessboard):
         for num_column, _ in enumerate(row):
             coord = (num_column, num_row)
@@ -406,4 +414,6 @@ if __name__ == "__main__":
                 # print(coord, square)
                 legal_moves = chess.get_all_legal_moves(coord)
 
-                print(f"{square} {legal_moves}")
+                print(
+                    f"{square} {[chess.coord_to_notation(legal_move[0]) for legal_move in legal_moves]}")
+    """
