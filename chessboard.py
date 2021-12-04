@@ -245,7 +245,7 @@ class Chessboard:
                                 square1, square2, coord2)
 
                         case 4:
-                            legal = self.can_castle(square1, coord)
+                            legal = self.can_castle(square1, coord, coord2)
 
                     if legal:
                         legal_moves.append((coord2, value))
@@ -318,25 +318,26 @@ class Chessboard:
         return False
 
     # Checks if King can castle
-    def can_castle(self, square, coord):
-        x, y = coord
+    def can_castle(self, square1, coord1, coord2):
+        x1, y1 = coord1
+        x2, _ = coord2
 
-        if not square.get_already_moved():
-            if x < 4:
-                for i in range(1, x):
-                    if self.get_square((x-i, y)) != 0:
+        if not square1.get_already_moved():
+            if x2 < 4:
+                for i in range(1, x1):
+                    if self.get_square((x1-i, y1)) != 0:
                         return False
 
-                rook = self.get_square((0, y))
+                rook = self.get_square((0, y1))
 
                 if rook != 0 and not rook.get_already_moved():
                     return True
             else:
-                for i in range(1, 7-x):
-                    if self.get_square((x+i, y)) != 0:
+                for i in range(1, 7-x1):
+                    if self.get_square((x1+i, y1)) != 0:
                         return False
 
-                rook = self.get_square((7, y))
+                rook = self.get_square((7, y1))
 
                 if rook != 0 and not rook.get_already_moved():
                     return True
@@ -396,13 +397,11 @@ if __name__ == "__main__":
 
     # prints out all the legal moves the wP on d5 can move to
     print([chess.coord_to_notation(legal_move[0])
-          for legal_move in chess.get_all_legal_moves(chess.notation_to_coord("d5"))])
+          for legal_move in chess.get_all_legal_moves(chess.notation_to_coord("e8"))])
 
     print(chess)
-
     chess.move_and_special_moves(chess.notation_to_coord(
-        "d5"), chess.notation_to_coord("e6"), 3)
-
+        "e8"), chess.notation_to_coord("g8"), 4)
     print(chess)
 
     """
