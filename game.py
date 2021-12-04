@@ -1,13 +1,8 @@
 from random import shuffle
 
-# import jsonpickle
+import jsonpickle
 
 from chessboard import Chessboard
-
-
-# Deserialises the instance of the Game class.
-# def deserialise(serialised_object):
-#     return jsonpickle.decode(serialised_object)
 
 
 # Stores all the information for each instance of a chess game
@@ -136,8 +131,13 @@ class Game:
         return positions
 
     # Serialises the instance of this class
-    # def serialise(self):
-    #     return jsonpickle.encode(self)
+    def serialise(self):
+        return jsonpickle.encode(self)
+
+
+# Deserialises an instance of the Game class.
+def deserialise(serialised_object):
+    return jsonpickle.decode(serialised_object)
 
 
 if __name__ == "__main__":
