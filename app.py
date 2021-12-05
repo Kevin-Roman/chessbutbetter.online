@@ -58,47 +58,20 @@ def connect():
     print('connected')
 
 
-# Emits all the legal moves in dictionary format
+# Emits all the legal moves in dictionary format, position dictionary, and game information
 @socketio.on('available_moves')
-def available_moves():
-    game = deserialise(session.get('game'))
-    socketio.emit('available_moves_response', {
-        'available_moves': game.available_move_dictionary()})
-
-    print('available_moves')
-# , 'position': game.position_dictionary()
-
-
-# Emits a piece and then returns all the legal moves in dictionary format
-@socketio.on('next_move')
-def next_move(move):
-    # print(move)
+def available_moves(move=None):
     game = deserialise(session.get('game'))
 
-    socketio.emit('available_moves_response', {
-        'available_moves': game.next_move(move)})
+    if move is None:
+        available_moves_dict = game.available_move_dictionary()
+    else:
+        print(f"\n\n{move}\n\n")
+        available_moves_dict = game.next_move(move)
 
-    # Stores the updated game object into the session variable 'game'
+        print(game.chess)
+
     session['game'] = game.serialise()
-
-    print(f"\n{game.chess}\n")
-    print('next_move')
-
-
-# Emits the chessboard configuration in dictionary format
-@socketio.on('position')
-def position():
-    game = deserialise(session.get('game'))
-    socketio.emit('position_response', {
-                  'position': game.position_dictionary()})
-
-    print('position')
-
-
-# Emits all the information about the game
-@socketio.on('information')
-def information():
-    game = deserialise(session.get('game'))
 
     current_turn = game.get_current_turn()
     winner = game.get_winner()
@@ -108,9 +81,10 @@ def information():
     information = {'current_turn': current_turn,
                    'winner': winner, 'checkmate': checkmate, 'draw': draw}
 
-    socketio.emit('information_response', information)
+    socketio.emit('available_moves_response', {
+        'available_moves': available_moves_dict, 'position': game.position_dictionary(), 'information': information})
 
-    print('information')
+    print('available_moves')
 
 
 if __name__ == "__main__":

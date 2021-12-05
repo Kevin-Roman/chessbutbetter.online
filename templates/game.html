@@ -21,22 +21,21 @@
   let turn = 0
   let legal_moves = null
 
-  socket.on('available_moves_response', ({ available_moves }) => {
-    legal_moves = available_moves
-  })
-
-  socket.on('position_response', ({ position }) => {
+  socket.on('available_moves_response', ({ available_moves, position, information }) => {
     board.position(position)
-  })
 
-  socket.on('information_response', (information) => {
+    legal_moves = available_moves
+
     current_turn = information['current_turn']
     winner = information['winner']
     checkmate = information['checkmate']
     draw = information['draw']
+
+    console.log('available_moves_response')
   })
 
   const onDragStart = (source, piece, position, orientation) => {
+    console.log('onDragStart')
     //console.log(piece)
     // do not pick up pieces if the game is over
     if (winner != null) return false
@@ -49,6 +48,7 @@
   }
 
   const onDrop = (source, target) => {
+    console.log('onDrop')
     // see if the move is legal
     if (legal_moves.length === 0) {
       return 'snapback'
@@ -62,15 +62,9 @@
       return 'snapback'
     } else {
       // joins the string variable source with the square and special move its moving to
-      socket.emit('next_move', source.concat(legal_moves[source][index_of_move]))
+      console.log('emit available_moves')
+      socket.emit('available_moves', source.concat(legal_moves[source][index_of_move]))
     }
-  }
-
-  // update the board position after the piece snap
-  // for castling, en passant, pawn promotion
-  const onSnapEnd = () => {
-    socket.emit('position')
-    socket.emit('information')
   }
 
   const config = {
@@ -78,7 +72,6 @@
     position: 'start',
     onDragStart: onDragStart,
     onDrop: onDrop,
-    onSnapEnd: onSnapEnd,
   }
   board = Chessboard('myBoard', config)
 
