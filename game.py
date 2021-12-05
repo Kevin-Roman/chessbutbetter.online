@@ -1,29 +1,22 @@
-from random import shuffle
-
 import jsonpickle
 
 from chessboard import Chessboard
 
 
-# Stores all the information for each instance of a chess game
-class Game:
-    def __init__(self, game_id, player1, player2):
-        players = [player1, player2]  # stores the IDs of the two players
-        shuffle(players)
+# Deserialises an instance of the Game class.
+def deserialise(serialised_object):
+    return jsonpickle.decode(serialised_object)
 
+
+# Stores all the information for each instance of a chess game
+# Can be considered as an offline multiplayer game
+class Game:
+    def __init__(self):
         self.chess = Chessboard()
-        self._game_id = game_id
-        self._players = players  # index 0 is white, index 1 is black
         self._current_turn = 0
         self._winner = None
         self._checkmate = False
         self._draw = False
-
-    def get_game_id(self):
-        return self._game_id
-
-    def get_players(self):
-        return self._players
 
     def get_current_turn(self):
         return self._current_turn
@@ -64,7 +57,6 @@ class Game:
 
     # Executes the legal move, and returns all the new legal_moves
     def next_move(self, move, mutual_draw=False):
-        print(move[:2], move[2:4])
         coord1 = self.chess.notation_to_coord(move[:2])
         coord2 = self.chess.notation_to_coord(move[2:4])
 
@@ -76,6 +68,8 @@ class Game:
 
         # If the move is legal, make the move, and add it to the history of moves
         if coord2 in [legal_move[0] for legal_move in self.chess.get_all_legal_moves(coord1)]:
+            # print(self.chess.get_all_legal_moves(
+            #     coord1), coord2 + str(special_move))
             self.chess.move_and_special_moves(coord1, coord2, special_move)
             self.chess.append_history(coord1, coord2)
         else:
@@ -135,13 +129,8 @@ class Game:
         return jsonpickle.encode(self)
 
 
-# Deserialises an instance of the Game class.
-def deserialise(serialised_object):
-    return jsonpickle.decode(serialised_object)
-
-
 if __name__ == "__main__":
-    game = Game("1", 1, 2)
+    game = Game()
     print(game.chess)
 
     print(game.next_move("b1a3"))

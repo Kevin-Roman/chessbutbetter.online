@@ -1,0 +1,87 @@
+{% extends "template.html" %} {% block scripts %}
+<link rel="stylesheet" href="{{url_for('static', filename='chessboardjs-1.0.0/css/chessboard-1.0.0.css')}}" />
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"
+></script>
+<script
+  type="text/javascript"
+  src="{{url_for('static', filename='chessboardjs-1.0.0/js/chessboard-1.0.0.js')}}"
+></script>
+{% endblock %} {% block chessboard %}
+
+<div id="myBoard" style="width: 500px"></div>
+
+<script type="text/javascript" charset="utf-8">
+  let board = null
+  let winner = null
+  let checkmate = false
+  let draw = false
+  let turn = 0
+  let legal_moves = null
+
+  socket.on('available_moves_response', ({ available_moves }) => {
+    legal_moves = available_moves
+  })
+
+  socket.on('position_response', ({ position }) => {
+    board.position(position)
+  })
+
+  socket.on('information_response', (information) => {
+    current_turn = information['current_turn']
+    winner = information['winner']
+    checkmate = information['checkmate']
+    draw = information['draw']
+  })
+
+  const onDragStart = (source, piece, position, orientation) => {
+    //console.log(piece)
+    // do not pick up pieces if the game is over
+    if (winner != null) return false
+
+    // only pick up pieces for the side to move
+    if ((turn === 0 && piece.search(/^b/) !== -1) || (turn === 1 && piece.search(/^w/) !== -1)) {
+      // ! change later to false
+      return true
+    }
+  }
+
+  const onDrop = (source, target) => {
+    // see if the move is legal
+    if (legal_moves.length === 0) {
+      return 'snapback'
+    }
+
+    // gets the coordinate part of the string
+    only_legal_coordinates = legal_moves[source].map((v) => v.slice(0, 2))
+    index_of_move = only_legal_coordinates.indexOf(target)
+
+    if (index_of_move === -1) {
+      return 'snapback'
+    } else {
+      // joins the string variable source with the square and special move its moving to
+      socket.emit('next_move', source.concat(legal_moves[source][index_of_move]))
+    }
+  }
+
+  // update the board position after the piece snap
+  // for castling, en passant, pawn promotion
+  const onSnapEnd = () => {
+    socket.emit('position')
+    socket.emit('information')
+  }
+
+  const config = {
+    draggable: true,
+    position: 'start',
+    onDragStart: onDragStart,
+    onDrop: onDrop,
+    onSnapEnd: onSnapEnd,
+  }
+  board = Chessboard('myBoard', config)
+
+  socket.emit('available_moves')
+</script>
+{% endblock %}
