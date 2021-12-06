@@ -386,22 +386,22 @@ if __name__ == "__main__":
     chess = Chessboard()
 
     chess.move_and_special_moves(chess.notation_to_coord(
-        "f8"), chess.notation_to_coord("f6"), None)
-    chess.append_history(chess.notation_to_coord("f8"),
-                         chess.notation_to_coord("f6"))
+        "f1"), chess.notation_to_coord("d3"), None)
+    chess.append_history(chess.notation_to_coord("f1"),
+                         chess.notation_to_coord("d3"))
 
     chess.move_and_special_moves(chess.notation_to_coord(
-        "g8"), chess.notation_to_coord("g6"), None)
-    chess.append_history(chess.notation_to_coord("g6"),
-                         chess.notation_to_coord("g6"))
+        "g1"), chess.notation_to_coord("f3"), None)
+    chess.append_history(chess.notation_to_coord("g1"),
+                         chess.notation_to_coord("f3"))
 
     # prints out all the legal moves the wP on d5 can move to
     print([chess.coord_to_notation(legal_move[0])
-          for legal_move in chess.get_all_legal_moves(chess.notation_to_coord("e8"))])
+          for legal_move in chess.get_all_legal_moves(chess.notation_to_coord("e1"))])
 
     print(chess)
     chess.move_and_special_moves(chess.notation_to_coord(
-        "e8"), chess.notation_to_coord("g8"), 4)
+        "e1"), chess.notation_to_coord("g1"), 4)
     print(chess)
 
     """

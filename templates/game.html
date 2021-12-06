@@ -14,6 +14,9 @@
 <div id="myBoard" style="width: 500px"></div>
 
 <script type="text/javascript" charset="utf-8">
+  const whiteSquareHighlighted = '#a9a9a9'
+  const blackSquareHighlighted = '#696969'
+
   let board = null
   let winner = null
   let checkmate = false
@@ -34,6 +37,21 @@
     console.log('available_moves_response')
   })
 
+  const removeHighlightedSquares = () => {
+    $('#myBoard .square-55d63').css('background', '')
+  }
+
+  const highlightSquare = (square) => {
+    let $square = $('#myBoard .square-' + square)
+
+    let background = whiteSquareHighlighted
+    if ($square.hasClass('black-3c85d')) {
+      background = blackSquareHighlighted
+    }
+
+    $square.css('background', background)
+  }
+
   const onDragStart = (source, piece, position, orientation) => {
     console.log('onDragStart')
     //console.log(piece)
@@ -49,15 +67,13 @@
 
   const onDrop = (source, target) => {
     console.log('onDrop')
-    // see if the move is legal
-    if (legal_moves.length === 0) {
-      return 'snapback'
-    }
 
     // gets the coordinate part of the string
-    only_legal_coordinates = legal_moves[source].map((v) => v.slice(0, 2))
-    index_of_move = only_legal_coordinates.indexOf(target)
+    const only_legal_coordinates = legal_moves[source].map((v) => v.slice(0, 2))
 
+    const index_of_move = only_legal_coordinates.indexOf(target)
+
+    // only place if move is legal
     if (index_of_move === -1) {
       return 'snapback'
     } else {
@@ -67,11 +83,38 @@
     }
   }
 
+  const onMouseoverSquare = (square, piece) => {
+    console.log('onMouseoverSquare')
+    // gets the coordinate part of the string
+
+    // if (!legal_moves[square]) return
+
+    const only_legal_coordinates = legal_moves[square].map((v) => v.slice(0, 2))
+
+    // exit if theres are no moves available for this square
+    if (only_legal_coordinates.length === 0) return
+
+    // highlight the square they moused over
+    highlightSquare(square)
+
+    // highlight the possible squares for this piece
+    for (let i = 0; i < only_legal_coordinates.length; i++) {
+      highlightSquare(only_legal_coordinates[i])
+    }
+  }
+
+  const onMouseoutSquare = (square, piece) => {
+    console.log('onMouseoutSquare')
+    removeHighlightedSquares()
+  }
+
   const config = {
     draggable: true,
     position: 'start',
     onDragStart: onDragStart,
     onDrop: onDrop,
+    onMouseoutSquare: onMouseoutSquare,
+    onMouseoverSquare: onMouseoverSquare,
   }
   board = Chessboard('myBoard', config)
 
