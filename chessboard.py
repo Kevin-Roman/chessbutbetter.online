@@ -6,18 +6,18 @@ from pieces import Pawn, Knight, Bishop, Rook, Queen, King
 class Chessboard:
     def __init__(self):
         self.chessboard = [
-            [Rook(0), Knight(0), Bishop(0), Queen(0),
-             King(0), Bishop(0), Knight(0), Rook(0)],
-            [Pawn(0), Pawn(0), Pawn(0), Pawn(0), Pawn(0),
-             Pawn(0), Pawn(0), Pawn(0)],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
+            [Rook(1), Knight(1), Bishop(1), Queen(1),
+             King(1), Bishop(1), Knight(1), Rook(1)],
             [Pawn(1), Pawn(1), Pawn(1), Pawn(1), Pawn(1),
              Pawn(1), Pawn(1), Pawn(1)],
-            [Rook(1), Knight(1), Bishop(1), Queen(1),
-             King(1), Bishop(1), Knight(1), Rook(1)]]
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [Pawn(0), Pawn(0), Pawn(0), Pawn(0), Pawn(0),
+             Pawn(0), Pawn(0), Pawn(0)],
+            [Rook(0), Knight(0), Bishop(0), Queen(0),
+             King(0), Bishop(0), Knight(0), Rook(0)]]
 
         self._history = []
 
@@ -55,10 +55,10 @@ class Chessboard:
         # en passant
         if special_move == 3:
             if colour == 0:
-                self.chessboard[y2 - 1][x2] = 0
+                self.chessboard[y2 + 1][x2] = 0
 
             elif colour == 1:
-                self.chessboard[y2 + 1][x2] = 0
+                self.chessboard[y2 - 1][x2] = 0
 
         # castling
         elif special_move == 4:
@@ -70,11 +70,11 @@ class Chessboard:
 
         # promotion
         if self.get_square(coord1) != 0 and self.get_square(coord1).get_name() == "Pawn":
-            if colour == 0 and y2 == 7:
+            if colour == 0 and y2 == 0:
                 self.chessboard[y2][x2] = Queen(0)
                 self.chessboard[y2][x2].set_already_moved(True)
 
-            elif colour == 1 and y2 == 0:
+            elif colour == 1 and y2 == 7:
                 self.chessboard[y2][x2] = Queen(1)
                 self.chessboard[y2][x2].set_already_moved(True)
 
@@ -277,9 +277,9 @@ class Chessboard:
             return False
 
         if colour == 0:
-            sign = 1
-        else:
             sign = -1
+        else:
+            sign = 1
 
         for i in range(1, 3):
             if self.get_square((x, y+(sign*i))) != 0:
@@ -302,9 +302,9 @@ class Chessboard:
         x, y = coord2
 
         if colour == 0:
-            i = -1
-        else:
             i = 1
+        else:
+            i = -1
 
         last_move = (history or [None])[-1]
 
@@ -349,7 +349,7 @@ class Chessboard:
     def __str__(self):
         str_chessboard = ""
         for x in range(8):
-            str_chessboard += f"{x+1}  "
+            str_chessboard += f"{8-x}  "
 
             for y in range(8):
                 piece_in_square = str(self.chessboard[x][y])
@@ -370,17 +370,18 @@ class Chessboard:
         x_axis = {"a": 0, "b": 1, "c": 2, "d": 3,
                   "e": 4, "f": 5, "g": 6, "h": 7}
 
-        return (x_axis[x], int(y)-1)
+        return (x_axis[x], 8 - int(y))
 
     # converts notation format to coordinate format (e.g. from (0,0)  to "a1")
     @staticmethod
     def coord_to_notation(coord):
+        # pylint: disable=unbalanced-tuple-unpacking
         x, y = list(coord)
 
         x_axis = {0: "a", 1: "b", 2: "c", 3: "d",
                   4: "e", 5: "f", 6: "g", 7: "h"}
 
-        return x_axis[x] + str(y+1)
+        return x_axis[x] + str(8-y)
 
 
 if __name__ == "__main__":
