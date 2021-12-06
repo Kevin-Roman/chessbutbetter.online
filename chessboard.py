@@ -50,6 +50,8 @@ class Chessboard:
 
         x2, y2 = coord2
 
+        self.chessboard[y2][x2].set_already_moved(True)
+
         # en passant
         if special_move == 3:
             if colour == 0:

@@ -64,7 +64,7 @@ class Game:
         if len(move) == 4:
             special_move = None
         else:
-            special_move = move[-1]
+            special_move = int(move[-1])
 
         # If the move is legal, make the move, and add it to the history of moves
         if coord2 in [legal_move[0] for legal_move in self.chess.get_all_legal_moves(coord1)]:
