@@ -85,9 +85,9 @@ class Pawn(Piece):
                  [-1, 0, -1]]
 
         if colour == 1:
-            self.set_available_moves(moves)
-        else:
             self.set_available_moves(moves[::-1])
+        else:
+            self.set_available_moves(moves)
 
 
 # Knight subclass which inherits all the members of the Piece class.

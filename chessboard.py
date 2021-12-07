@@ -69,7 +69,7 @@ class Chessboard:
                 self.move((7, y2), (x2-1, y2))
 
         # promotion
-        if self.get_square(coord1) != 0 and self.get_square(coord1).get_name() == "Pawn":
+        if self.get_square(coord2) != 0 and self.get_square(coord2).get_name() == "Pawn":
             if colour == 0 and y2 == 0:
                 self.chessboard[y2][x2] = Queen(0)
                 self.chessboard[y2][x2].set_already_moved(True)
@@ -257,13 +257,10 @@ class Chessboard:
     # Checks if a piece can do a 'value 1' move (knight move, king single square move, and pawn single move forwards)
     @staticmethod
     def case_1(square1, square2):
-        if square1.get_name() == "Pawn" and square2 == 0:
-            return True
-
         if square2 == 0:
             return True
 
-        if square1.get_colour() != square2.get_colour():
+        elif square1.get_name() != "Pawn" and square1.get_colour() != square2.get_colour():
             return True
 
         return False
