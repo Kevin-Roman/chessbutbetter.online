@@ -53,7 +53,7 @@ class Chessboard:
         self.chessboard[y2][x2].set_already_moved(True)
 
         # en passant
-        if special_move == 3:
+        if special_move == 5:
             if colour == 0:
                 self.chessboard[y2 + 1][x2] = 0
 
@@ -244,7 +244,12 @@ class Chessboard:
 
                         case 3:
                             legal = self.can_pawn_capture(
-                                square1, square2, coord2)
+                                square1, square2)
+
+                            if not legal:
+                                legal = self.can_enpassant(square1, coord2)
+                                if legal:
+                                    value = 5
 
                         case 4:
                             legal = self.can_castle(square1, coord, coord2)
@@ -285,12 +290,12 @@ class Chessboard:
         return True
 
     # Checks if a pawn can capture a piece
-    def can_pawn_capture(self, square1, square2, coord2):
+    def can_pawn_capture(self, square1, square2):
         if square2 != 0:
             if square1.get_colour() != square2.get_colour():
                 return True
 
-        return self.can_enpassant(square1, coord2)
+        return False
 
     # check if a pawn can do the 'en passant' move
     def can_enpassant(self, square, coord2):
