@@ -72,14 +72,23 @@ class Game:
             #     coord1), coord2 + str(special_move))
             self.chess.move_and_special_moves(coord1, coord2, special_move)
             self.chess.append_history(coord1, coord2)
+            self.change_current_turn()
         else:
             return None
 
+        # checks the opposing side if they have any legal_moves to make. If they don't then its end game.
         is_checkmate_or_draw = self.chess.is_checkmate_or_draw(
             self.get_current_turn())
 
+        # print(self.get_current_turn(), str(is_checkmate_or_draw))
+
         if is_checkmate_or_draw:
-            self.end_game(self.get_current_turn(), is_checkmate_or_draw)
+            if self.get_current_turn() == 0:
+                winner_colour = 1
+            else:
+                winner_colour = 0
+
+            self.end_game(winner_colour, is_checkmate_or_draw)
             return None
 
         # If both players have agreed to draw, game is set to a draw

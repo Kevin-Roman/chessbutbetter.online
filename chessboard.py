@@ -141,8 +141,11 @@ class Chessboard:
                 coord = (num_column, num_row)
                 square = self.get_square(coord)
                 if square != 0 and square.get_colour() == turn:
-                    all_legal_moves.append(
-                        self.get_all_legal_moves(coord))
+                    legal_moves = self.get_all_legal_moves(coord)
+                    if legal_moves != []:
+                        all_legal_moves.append(legal_moves)
+
+        # print(f"legal_moves: {all_legal_moves}")
 
         # Determines whether it is a checkmate or a stalemate
         if len(all_legal_moves) == 0:
@@ -160,7 +163,7 @@ class Chessboard:
 
             for y, row in enumerate(self.chessboard):
                 for x, square in enumerate(row):
-                    if square != 0 and square.get_colour() == turn and square[1] == "K":
+                    if square != 0 and square.get_colour() == turn and str(square)[1] == "K":
                         king_coordinate = (x, y)
                         break
 
