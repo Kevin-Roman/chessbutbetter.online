@@ -1,0 +1,169 @@
+import copy
+import math
+import random
+
+# Piece type to piece value conversion
+eval_position = {"P": 1, "B": 3, "N": 3, "R": 5, "Q": 9, "K": math.inf}
+
+
+# Receives a piece and returns its respective value depending on type and colour
+def piece_value(piece, player_colour):
+    value = eval_position[piece.get_name()[0]]
+
+    # If the colour of the piece is the same as the player's colour then the value value is turned negative
+    if piece.get_colour() == player_colour:
+        value *= -1
+
+    return value
+
+
+# Calculates the total evaluation of the chessboard where a larger evaluation is better for the AI
+def evaluate(chessboard, player_colour):
+    total_eval_value = 0
+
+    # Iterates through each square
+    for num_row in range(8):
+        for num_column in range(8):
+            coord = (num_column, num_row)
+            square = chessboard.get_square(coord)
+
+            # If square contains a piece
+            if square != 0:
+                # Add the value of the piece to total_eval_value
+                total_eval_value += piece_value(square, player_colour)
+
+    return total_eval_value
+
+
+# Uses the minimax algorithm to decide the best move the computer should make given the depth value given (how many moves ahead the algorithm will look at).
+def minimax(chessboard, depth, player_colour):
+    return maximise(chessboard, depth, player_colour, True)
+
+
+# Maximises the chessboard evaluation
+def maximise(chessboard, depth, player_colour, best_move_wanted):
+    if depth == 0:
+        return evaluate(chessboard, player_colour)
+
+    # Sets max_eval to negative infinity
+    max_eval = -math.inf
+    best_move = []
+
+    # Iterates through each square in the chessboard
+    for num_row in range(8):
+        for num_column in range(8):
+            coord = (num_column, num_row)
+            square = chessboard.get_square(coord)
+
+            if square != 0 and square.get_colour() != player_colour:
+                all_moves = chessboard.get_all_legal_moves(coord)
+
+                # Get the best possible move the computer could make
+                for move in all_moves:
+                    original_chessboard = copy.deepcopy(chessboard.chessboard)
+
+                    chessboard.move_and_special_moves(coord, move[0], move[1])
+
+                    score = minimise(chessboard, depth - 1, player_colour)
+
+                    chessboard.chessboard = copy.deepcopy(
+                        original_chessboard)
+
+                    if best_move_wanted:
+                        # Once the evaluation of each move is calculated, if the current move's evaluation score is greater than max_eval, set max_value to the current move's score.
+                        if score > max_eval:
+                            best_move = [(coord, move)]
+
+                        elif score == max_eval:
+                            # If multiple moves with the same best evalution, then append to the best_move list.
+                            best_move.append((coord, move))
+
+                    elif score > max_eval:
+                        max_eval = score
+
+    if best_move_wanted:
+        # return the best move
+        return best_move
+
+    return max_eval
+
+
+# Minimises the chessboard evaluation
+def minimise(chessboard, depth, player_colour):
+    if depth == 0:
+        return evaluate(chessboard, player_colour)
+
+    # Sets max_eval to positive infinity
+    min_eval = math.inf
+
+    # Iterates through each square in the chessboard
+    for num_row in range(8):
+        for num_column in range(8):
+            coord = (num_column, num_row)
+            square = chessboard.get_square(coord)
+
+            if square != 0 and square.get_colour() != player_colour:
+                all_moves = chessboard.get_all_legal_moves(coord)
+
+                # Get the best possible move the player could make
+                for move in all_moves:
+                    original_chessboard = copy.deepcopy(chessboard.chessboard)
+
+                    chessboard.move_and_special_moves(coord, move[0], move[1])
+
+                    score = maximise(chessboard, depth - 1,
+                                     player_colour, False)
+
+                    chessboard.chessboard = copy.deepcopy(
+                        original_chessboard)
+
+                    if score < min_eval:
+                        min_eval = score
+
+    return min_eval
+
+
+# ! compare times between depths and beta-alpha pruning and then find the average time and compare.
+
+if __name__ == "__main__":
+    from chessboard import Chessboard
+
+    chess = Chessboard()
+
+    # Play game whilst True
+    while True:
+        print(chess)
+
+        # e.g. c2 = source square, 3c = target square, 2 = special move
+        player_move = input('Your move (e.g. "c2c42"): ')
+        source = chess.notation_to_coord(player_move[:2])
+        target = chess.notation_to_coord(player_move[2:4])
+
+        # if no special move specified, set special_move to None
+        if len(player_move) > 4:
+            special_move = int(player_move[-1])
+        else:
+            special_move = None
+
+        piece = chess.get_square(source)
+
+        print(chess.get_all_legal_moves(source))
+
+        # validation to see if the move is legal for the user to make.
+        if (target, special_move) in chess.get_all_legal_moves(source) and piece != 0 and piece.get_colour() == 0:
+            # make the player's move
+            chess.move_and_special_moves(source, target, special_move)
+
+            # Set the depth value
+            depth = 3
+
+            # Gets the best move the computer could make, if there are several best moves, then random.choice will pick one at random.
+            ai_move = random.choice(minimax(chess, depth, 0))
+            ai_source = ai_move[0]
+            ai_target, ai_special_move = ai_move[1]
+
+            # make that move
+            chess.move_and_special_moves(ai_source, ai_target, ai_special_move)
+
+        else:
+            print("Not a legal move, try again.")
