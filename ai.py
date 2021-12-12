@@ -3,7 +3,7 @@ import math
 import random
 
 # Piece type to piece value conversion
-eval_position = {"P": 1, "B": 3, "N": 3, "R": 5, "Q": 9, "K": math.inf}
+eval_position = {"P": 1, "B": 3, "N": 3, "R": 5, "Q": 9, "K": 1000}
 
 
 # Receives a piece and returns its respective value depending on type and colour
@@ -65,7 +65,7 @@ def maximise(chessboard, depth, player_colour, best_move_wanted):
                     chessboard.move_and_special_moves(coord, move[0], move[1])
 
                     score = minimise(chessboard, depth - 1, player_colour)
-
+                    # print(score)
                     chessboard.chessboard = copy.deepcopy(
                         original_chessboard)
 
@@ -78,10 +78,11 @@ def maximise(chessboard, depth, player_colour, best_move_wanted):
                             # If multiple moves with the same best evalution, then append to the best_move list.
                             best_move.append((coord, move))
 
-                    elif score > max_eval:
+                    if score > max_eval:
                         max_eval = score
 
     if best_move_wanted:
+        # print(f"score: {max_eval}")
         # return the best move
         return best_move
 
@@ -102,7 +103,7 @@ def minimise(chessboard, depth, player_colour):
             coord = (num_column, num_row)
             square = chessboard.get_square(coord)
 
-            if square != 0 and square.get_colour() != player_colour:
+            if square != 0 and square.get_colour() == player_colour:
                 all_moves = chessboard.get_all_legal_moves(coord)
 
                 # Get the best possible move the player could make
@@ -123,9 +124,9 @@ def minimise(chessboard, depth, player_colour):
     return min_eval
 
 
-# ! compare times between depths and beta-alpha pruning and then find the average time and compare.
-
 if __name__ == "__main__":
+    import time
+
     from chessboard import Chessboard
 
     chess = Chessboard()
@@ -155,10 +156,24 @@ if __name__ == "__main__":
             chess.move_and_special_moves(source, target, special_move)
 
             # Set the depth value
-            depth = 3
+            depth = 2
+
+            ai_move = random.choice(minimax(chess, depth, 0))
 
             # Gets the best move the computer could make, if there are several best moves, then random.choice will pick one at random.
-            ai_move = random.choice(minimax(chess, depth, 0))
+            # time_before = time.time()
+            # ai_move = random.choice(minimax(chess, 1, 0))
+            # print(f"Depth 1: {time.time() - time_before}")
+
+            # time_before = time.time()
+            # ai_move = random.choice(minimax(chess, 2, 0))
+            # print(f"Depth 2: {time.time() - time_before}")
+
+            # time_before = time.time()
+            # ai_move = random.choice(minimax(chess, 3, 0))
+            # print(f"Depth 3: {time.time() - time_before}")
+            # break
+
             ai_source = ai_move[0]
             ai_target, ai_special_move = ai_move[1]
 
