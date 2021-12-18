@@ -37,11 +37,11 @@ def evaluate(chessboard, player_colour):
 
 # Uses the minimax algorithm to decide the best move the computer should make given the depth value given (how many moves ahead the algorithm will look at).
 def minimax(chessboard, depth, player_colour):
-    return maximise(chessboard, depth, player_colour, True)
+    return maximise(chessboard, depth, -math.inf, math.inf, player_colour, True)
 
 
 # Maximises the chessboard evaluation
-def maximise(chessboard, depth, player_colour, best_move_wanted):
+def maximise(chessboard, depth, alpha, beta, player_colour, best_move_wanted):
     if depth == 0:
         return evaluate(chessboard, player_colour)
 
@@ -64,7 +64,8 @@ def maximise(chessboard, depth, player_colour, best_move_wanted):
 
                     chessboard.move_and_special_moves(coord, move[0], move[1])
 
-                    score = minimise(chessboard, depth - 1, player_colour)
+                    score = minimise(chessboard, depth - 1,
+                                     alpha, beta, player_colour)
                     # print(score)
                     chessboard.chessboard = copy.deepcopy(
                         original_chessboard)
@@ -81,8 +82,14 @@ def maximise(chessboard, depth, player_colour, best_move_wanted):
                     if score > max_eval:
                         max_eval = score
 
+                    if max_eval > alpha:
+                        alpha = max_eval
+
+                    if alpha >= beta:
+                        break
+
     if best_move_wanted:
-        # print(f"score: {max_eval}")
+        print(f"score: {max_eval}")
         # return the best move
         return best_move
 
@@ -90,7 +97,7 @@ def maximise(chessboard, depth, player_colour, best_move_wanted):
 
 
 # Minimises the chessboard evaluation
-def minimise(chessboard, depth, player_colour):
+def minimise(chessboard, depth, alpha, beta, player_colour):
     if depth == 0:
         return evaluate(chessboard, player_colour)
 
@@ -112,7 +119,7 @@ def minimise(chessboard, depth, player_colour):
 
                     chessboard.move_and_special_moves(coord, move[0], move[1])
 
-                    score = maximise(chessboard, depth - 1,
+                    score = maximise(chessboard, depth - 1, alpha, beta,
                                      player_colour, False)
 
                     chessboard.chessboard = copy.deepcopy(
@@ -121,18 +128,26 @@ def minimise(chessboard, depth, player_colour):
                     if score < min_eval:
                         min_eval = score
 
+                    if min_eval < beta:
+                        beta = min_eval
+
+                    if alpha >= beta:
+                        break
+
     return min_eval
 
 
 if __name__ == "__main__":
     import time
 
+    # 0: play game, 1: time elapsed, 2: time elapsed with profile stats
+    play_game = 2
+
     from chessboard import Chessboard
 
     chess = Chessboard()
 
-    # Play game whilst True
-    while True:
+    def play(play_game=2):
         print(chess)
 
         # e.g. c2 = source square, 3c = target square, 2 = special move
@@ -155,30 +170,53 @@ if __name__ == "__main__":
             # make the player's move
             chess.move_and_special_moves(source, target, special_move)
 
-            # Set the depth value
-            depth = 2
+            if play_game == 0:
+                # Set the depth value
+                depth = 2
 
-            ai_move = random.choice(minimax(chess, depth, 0))
+                # Gets the best move the computer could make, if there are several best moves, then random.choice will pick one at random.
+                ai_move = random.choice(minimax(chess, depth, 0))
 
-            # Gets the best move the computer could make, if there are several best moves, then random.choice will pick one at random.
-            # time_before = time.time()
-            # ai_move = random.choice(minimax(chess, 1, 0))
-            # print(f"Depth 1: {time.time() - time_before}")
+                ai_source = ai_move[0]
+                ai_target, ai_special_move = ai_move[1]
 
-            # time_before = time.time()
-            # ai_move = random.choice(minimax(chess, 2, 0))
-            # print(f"Depth 2: {time.time() - time_before}")
+                # make that move
+                chess.move_and_special_moves(
+                    ai_source, ai_target, ai_special_move)
 
-            # time_before = time.time()
-            # ai_move = random.choice(minimax(chess, 3, 0))
-            # print(f"Depth 3: {time.time() - time_before}")
-            # break
+            else:
+                time_before = time.time()
+                ai_move = random.choice(minimax(chess, 1, 0))
+                print(f"Depth 1: {time.time() - time_before}")
 
-            ai_source = ai_move[0]
-            ai_target, ai_special_move = ai_move[1]
+                time_before = time.time()
+                ai_move = random.choice(minimax(chess, 2, 0))
+                print(f"Depth 2: {time.time() - time_before}")
 
-            # make that move
-            chess.move_and_special_moves(ai_source, ai_target, ai_special_move)
+                time_before = time.time()
+                ai_move = random.choice(minimax(chess, 3, 0))
+                print(f"Depth 3: {time.time() - time_before}")
 
         else:
             print("Not a legal move, try again.")
+
+    if play_game == 0:
+        # Play game whilst True
+        while True:
+            play(play_game)
+
+    elif play_game == 1:
+        play(play_game)
+
+    else:
+        import cProfile
+        import pstats
+        from pstats import SortKey
+
+        # Creates instance of Profile class
+        profile = cProfile.Profile()
+
+        profile.runcall(play)
+        ps = pstats.Stats(profile)
+        # Displays the elasped time of functions in order of totaltime column
+        ps.strip_dirs().sort_stats(SortKey.TIME).print_stats()
