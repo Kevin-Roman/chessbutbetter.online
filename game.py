@@ -71,7 +71,6 @@ class Game:
             # print(self.chess.get_all_legal_moves(
             #     coord1), coord2 + str(special_move))
             self.chess.move_and_special_moves(coord1, coord2, special_move)
-            self.chess.append_history(coord1, coord2)
             self.change_current_turn()
         else:
             return None

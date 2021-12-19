@@ -31,32 +31,28 @@ class Chessboard:
     def get_history(self):
         return self._history
 
-    def append_history(self, previous_square, new_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move, pawn_promotion):
+    def append_history(self, previous_square, new_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move):
         self._history.append((previous_square, new_square,
-                             piece_attributes, captured_piece, pawn_enpassant, rook_castling_move, pawn_promotion))
+                             piece_attributes, captured_piece, pawn_enpassant, rook_castling_move))
 
     # Undo the last move
     def undo_move(self):
-        old_square, current_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move, pawn_promotion = self._history.pop()
+        old_square, current_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move = self._history.pop()
 
         self.move(current_square, old_square)
 
-        if pawn_promotion is not None:
-            # Convert Queen to pawn if promotion
-            self.set_square(current_square, pawn_promotion)
-        else:
-            # Set the square the piece moved to back to its original value
-            self.set_square(current_square, captured_piece)
+        # Set the square the piece moved to back to its original value
+        self.set_square(current_square, captured_piece)
 
-            if pawn_enpassant is not None:
-                # Place back the captured enemy pawn
-                self.set_square(pawn_enpassant[0], pawn_enpassant[1])
+        if pawn_enpassant is not None:
+            # Place back the captured enemy pawn
+            self.set_square(pawn_enpassant[0], pawn_enpassant[1])
 
-            elif rook_castling_move is not None:
-                # Move the rook back to its previous position
-                self.move(rook_castling_move[1], rook_castling_move[0])
-                self.chessboard[rook_castling_move[0][1]
-                                ][rook_castling_move[0][0]].set_already_moved(False)
+        elif rook_castling_move is not None:
+            # Move the rook back to its previous position
+            self.move(rook_castling_move[1], rook_castling_move[0])
+            self.chessboard[rook_castling_move[0][1]
+                            ][rook_castling_move[0][0]].set_already_moved(False)
 
         self.get_square(old_square).__dict__ = piece_attributes
 
@@ -86,7 +82,6 @@ class Chessboard:
 
         pawn_enpassant = None
         rook_castling_move = None
-        pawn_promotion = None
 
         # en passant
         if special_move == 5:
@@ -100,7 +95,7 @@ class Chessboard:
             elif colour == 1:
                 pawn_enpassant_coord = (x2, y2-1)
                 # pawn_enpassant = (coord, pawn object)
-                pawn_enpassant_coord = (
+                pawn_enpassant = (
                     pawn_enpassant_coord, self.get_square((x2, y2-1)))
                 self.set_square(pawn_enpassant_coord, 0)
 
@@ -117,17 +112,15 @@ class Chessboard:
         # promotion
         if self.get_square(coord2) != 0 and self.get_square(coord2).get_name() == "Pawn":
             if colour == 0 and y2 == 0:
-                pawn_promotion = self.get_square(coord2)
                 self.set_square(coord2, Queen(0))
                 self.chessboard[y2][x2].set_already_moved(True)
 
             elif colour == 1 and y2 == 7:
-                pawn_promotion = self.get_square(coord2)
                 self.set_square(coord2, Queen(1))
                 self.chessboard[y2][x2].set_already_moved(True)
 
         self.append_history(coord1, coord2, piece_attributes, captured_piece,
-                            pawn_enpassant, rook_castling_move, pawn_promotion)
+                            pawn_enpassant, rook_castling_move)
 
     # returns all the legal moves a piece can make and takes into consideration self discovered checks
     def get_all_legal_moves(self, coord1):
@@ -362,7 +355,11 @@ class Chessboard:
 
         last_move = (history or [None])[-1]
 
-        if last_move != self.coord_to_notation((x, y-i)) + self.coord_to_notation((x, y+i)):
+        if last_move is not None:
+            # pylint: disable=E1136
+            last_move = last_move[0:2]
+
+        if last_move != ((x, y-i), (x, y+i)):
             return False
 
         under_square = self.get_square((x, y+i))
