@@ -180,17 +180,10 @@ if __name__ == "__main__":
                     ai_source, ai_target, ai_special_move)
 
             else:
-                time_before = time.time()
-                ai_move = random.choice(minimax(chess, 1, 0))
-                print(f"Depth 1: {time.time() - time_before}")
-
-                time_before = time.time()
-                ai_move = random.choice(minimax(chess, 2, 0))
-                print(f"Depth 2: {time.time() - time_before}")
-
-                time_before = time.time()
-                ai_move = random.choice(minimax(chess, 3, 0))
-                print(f"Depth 3: {time.time() - time_before}")
+                for i in range(1, 5):
+                    time_before = time.time()
+                    ai_move = random.choice(minimax(chess, i, 0))
+                    print(f"Depth {i}: {time.time() - time_before}")
 
         else:
             print("Not a legal move, try again.")
