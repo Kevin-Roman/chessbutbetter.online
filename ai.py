@@ -1,4 +1,3 @@
-import copy
 import math
 import random
 
@@ -60,15 +59,13 @@ def maximise(chessboard, depth, alpha, beta, player_colour, best_move_wanted):
 
                 # Get the best possible move the computer could make
                 for move in all_moves:
-                    original_chessboard = copy.deepcopy(chessboard.chessboard)
 
                     chessboard.move_and_special_moves(coord, move[0], move[1])
 
                     score = minimise(chessboard, depth - 1,
                                      alpha, beta, player_colour)
                     # print(score)
-                    chessboard.chessboard = copy.deepcopy(
-                        original_chessboard)
+                    chessboard.undo_move()
 
                     if best_move_wanted:
                         # Once the evaluation of each move is calculated, if the current move's evaluation score is greater than max_eval, set max_value to the current move's score.
@@ -115,15 +112,13 @@ def minimise(chessboard, depth, alpha, beta, player_colour):
 
                 # Get the best possible move the player could make
                 for move in all_moves:
-                    original_chessboard = copy.deepcopy(chessboard.chessboard)
 
                     chessboard.move_and_special_moves(coord, move[0], move[1])
 
                     score = maximise(chessboard, depth - 1, alpha, beta,
                                      player_colour, False)
 
-                    chessboard.chessboard = copy.deepcopy(
-                        original_chessboard)
+                    chessboard.undo_move()
 
                     if score < min_eval:
                         min_eval = score
@@ -141,7 +136,7 @@ if __name__ == "__main__":
     import time
 
     # 0: play game, 1: time elapsed, 2: time elapsed with profile stats
-    play_game = 2
+    play_game = int(input("0, 1 or 2: "))
 
     from chessboard import Chessboard
 
@@ -172,7 +167,7 @@ if __name__ == "__main__":
 
             if play_game == 0:
                 # Set the depth value
-                depth = 2
+                depth = 3
 
                 # Gets the best move the computer could make, if there are several best moves, then random.choice will pick one at random.
                 ai_move = random.choice(minimax(chess, depth, 0))

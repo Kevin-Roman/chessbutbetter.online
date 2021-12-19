@@ -1,4 +1,3 @@
-import copy
 from pieces import Pawn, Knight, Bishop, Rook, Queen, King
 
 
@@ -25,58 +24,110 @@ class Chessboard:
     def get_square(self, coord):
         return self.chessboard[coord[1]][coord[0]]
 
+    # Sets the value/piece of the specific square on the chessboard
+    def set_square(self, coord, new_value):
+        self.chessboard[coord[1]][coord[0]] = new_value
+
     def get_history(self):
         return self._history
 
-    def append_history(self, previous_square, new_square):
-        notation1 = self.coord_to_notation(previous_square)
-        notation2 = self.coord_to_notation(new_square)
+    def append_history(self, previous_square, new_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move, pawn_promotion):
+        self._history.append((previous_square, new_square,
+                             piece_attributes, captured_piece, pawn_enpassant, rook_castling_move, pawn_promotion))
 
-        self._history.append(notation1 + notation2)
+    # Undo the last move
+    def undo_move(self):
+        old_square, current_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move, pawn_promotion = self._history.pop()
+
+        self.move(current_square, old_square)
+
+        if pawn_promotion is not None:
+            # Convert Queen to pawn if promotion
+            self.set_square(current_square, pawn_promotion)
+        else:
+            # Set the square the piece moved to back to its original value
+            self.set_square(current_square, captured_piece)
+
+            if pawn_enpassant is not None:
+                # Place back the captured enemy pawn
+                self.set_square(pawn_enpassant[0], pawn_enpassant[1])
+
+            elif rook_castling_move is not None:
+                # Move the rook back to its previous position
+                self.move(rook_castling_move[1], rook_castling_move[0])
+                self.chessboard[rook_castling_move[0][1]
+                                ][rook_castling_move[0][0]].set_already_moved(False)
+
+        self.get_square(old_square).__dict__ = piece_attributes
 
     # Takes in two coordinates, moves the piece from the previous square to the new_square and then sets the previous square value to 0
     def move(self, previous_square, new_square):
-        # print(previous_square, new_square)
+        captured_piece = self.get_square(new_square)
 
-        piece = self.chessboard[previous_square[1]][previous_square[0]]
-        self.chessboard[previous_square[1]][previous_square[0]] = 0
-        self.chessboard[new_square[1]][new_square[0]] = piece
+        piece = self.get_square(previous_square)
+
+        # Creates a copy of the attributes of the piece and stores it into a variable
+        moved_piece_attr = dict(piece.__dict__)
+
+        self.set_square(new_square, piece)
+        self.set_square(previous_square, 0)
+
+        return moved_piece_attr, captured_piece
 
     # Moves a piece to a different square, and takes into consideration special moves such as enpassant and castling
     def move_and_special_moves(self, coord1, coord2, special_move):
         colour = self.get_square(coord1).get_colour()
 
-        self.move(coord1, coord2)
+        piece_attributes, captured_piece = self.move(coord1, coord2)
 
         x2, y2 = coord2
 
         self.chessboard[y2][x2].set_already_moved(True)
 
+        pawn_enpassant = None
+        rook_castling_move = None
+        pawn_promotion = None
+
         # en passant
         if special_move == 5:
             if colour == 0:
-                self.chessboard[y2 + 1][x2] = 0
+                pawn_enpassant_coord = (x2, y2+1)
+                # pawn_enpassant = (coord, pawn object)
+                pawn_enpassant = (pawn_enpassant_coord,
+                                  self.get_square((x2, y2+1)))
+                self.set_square(pawn_enpassant_coord, 0)
 
             elif colour == 1:
-                self.chessboard[y2 - 1][x2] = 0
+                pawn_enpassant_coord = (x2, y2-1)
+                # pawn_enpassant = (coord, pawn object)
+                pawn_enpassant_coord = (
+                    pawn_enpassant_coord, self.get_square((x2, y2-1)))
+                self.set_square(pawn_enpassant_coord, 0)
 
         # castling
         elif special_move == 4:
             if x2 < 4:
-                self.move((0, y2), (x2+1, y2))
+                rook_castling_move = ((0, y2), (x2+1, y2))
+                self.move(rook_castling_move[0], rook_castling_move[1])
 
             else:
-                self.move((7, y2), (x2-1, y2))
+                rook_castling_move = ((7, y2), (x2-1, y2))
+                self.move(rook_castling_move[0], rook_castling_move[1])
 
         # promotion
         if self.get_square(coord2) != 0 and self.get_square(coord2).get_name() == "Pawn":
             if colour == 0 and y2 == 0:
-                self.chessboard[y2][x2] = Queen(0)
+                pawn_promotion = self.get_square(coord2)
+                self.set_square(coord2, Queen(0))
                 self.chessboard[y2][x2].set_already_moved(True)
 
             elif colour == 1 and y2 == 7:
-                self.chessboard[y2][x2] = Queen(1)
+                pawn_promotion = self.get_square(coord2)
+                self.set_square(coord2, Queen(1))
                 self.chessboard[y2][x2].set_already_moved(True)
+
+        self.append_history(coord1, coord2, piece_attributes, captured_piece,
+                            pawn_enpassant, rook_castling_move, pawn_promotion)
 
     # returns all the legal moves a piece can make and takes into consideration self discovered checks
     def get_all_legal_moves(self, coord1):
@@ -102,8 +153,6 @@ class Chessboard:
         else:
             initial = "b"
 
-        original_chessboard = copy.deepcopy(self.chessboard)
-
         for coord2, special_move in legal_moves:
             attacked_squares = []
 
@@ -128,7 +177,7 @@ class Chessboard:
             if king_coordinate not in [attacked_square[0] for attacked_square in attacked_squares]:
                 legal_moves_without_checks.append((coord2, special_move))
 
-            self.chessboard = copy.deepcopy(original_chessboard)
+            self.undo_move()
 
         return legal_moves_without_checks
 
@@ -395,13 +444,9 @@ if __name__ == "__main__":
 
     chess.move_and_special_moves(chess.notation_to_coord(
         "f1"), chess.notation_to_coord("d3"), None)
-    chess.append_history(chess.notation_to_coord("f1"),
-                         chess.notation_to_coord("d3"))
 
     chess.move_and_special_moves(chess.notation_to_coord(
         "g1"), chess.notation_to_coord("f3"), None)
-    chess.append_history(chess.notation_to_coord("g1"),
-                         chess.notation_to_coord("f3"))
 
     # prints out all the legal moves the wP on d5 can move to
     print([chess.coord_to_notation(legal_move[0])
