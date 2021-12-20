@@ -1,0 +1,171 @@
+{% extends "template.html" %} {% block scripts %}
+<link rel="stylesheet" href="{{url_for('static', filename='chessboardjs-1.0.0/css/chessboard-1.0.0.css')}}" />
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"
+></script>
+<script
+  type="text/javascript"
+  src="{{url_for('static', filename='chessboardjs-1.0.0/js/chessboard-1.0.0.js')}}"
+></script>
+{% endblock %} {% block chessboard %}
+
+<div id="myBoard" style="width: 500px"></div>
+<h2 id="winningMethod"></h2>
+<h2 id="winnerSide"></h2>
+<button onClick="window.location.reload();">Play a new game</button>
+
+<script type="text/javascript" charset="utf-8">
+  const whiteSquareHighlighted = '#a9a9a9'
+  const blackSquareHighlighted = '#696969'
+
+  let board = null
+  let winner = null
+  let checkmate = false
+  let draw = false
+  let turn = 0
+  let legalMoves = null
+
+  let depth = 2
+  let playerOrientation
+
+  // Picks the side the player will play on
+  const playerColour = Math.floor(Math.random() * 2)
+  console.log(playerColour)
+
+  if (playerColour === 0) {
+    playerOrientation = 'white'
+  } else {
+    playerOrientation = 'black'
+  }
+  console.log(playerOrientation)
+
+  let aiInfo = [depth, playerColour]
+
+  const displayWinner = (winningMethod) => {
+    $('#winningMethod').text(winningMethod + '!')
+    if (winner === 0) {
+      $('#winnerSide').text('White wins!')
+    } else {
+      $('#winnerSide').text('Black wins!')
+    }
+  }
+
+  socket.on('available_moves_response', ({ available_moves, position, information }) => {
+    board.position(position)
+
+    legalMoves = available_moves
+
+    turn = information['current_turn']
+    winner = information['winner']
+    checkmate = information['checkmate']
+    draw = information['draw']
+    console.log(winner, checkmate, draw)
+
+    if (checkmate) {
+      displayWinner('Checkmate', winner)
+    } else if (draw) {
+      displayWinner('Stalemate', winner)
+    }
+
+    console.log('available_moves_response')
+  })
+
+  const removeHighlightedSquares = () => {
+    $('#myBoard .square-55d63').css('background', '')
+  }
+
+  const highlightSquare = (square) => {
+    let $square = $('#myBoard .square-' + square)
+
+    let background = whiteSquareHighlighted
+    if ($square.hasClass('black-3c85d')) {
+      background = blackSquareHighlighted
+    }
+
+    $square.css('background', background)
+  }
+
+  const onDragStart = (source, piece, position, orientation) => {
+    console.log('onDragStart')
+    //console.log(piece)
+    // do not pick up pieces if the game is over
+    if (winner != null || checkmate || draw) return false
+
+    // only allow to pick up piece if it's the player's turn
+    if (turn !== playerColour) {
+      return false
+    }
+
+    // only pick up pieces for the side to move
+    if ((playerColour === 0 && piece.search(/^b/) !== -1) || (playerColour === 1 && piece.search(/^w/) !== -1)) {
+      return false
+    }
+  }
+
+  const onDrop = (source, target) => {
+    console.log('onDrop')
+
+    // gets the coordinate part of the string
+    const onlyLegalCoordinates = legalMoves[source].map((v) => v.slice(0, 2))
+
+    const indexOfMove = onlyLegalCoordinates.indexOf(target)
+
+    // only place if move is legal
+    if (indexOfMove === -1) {
+      return 'snapback'
+    } else {
+      // joins the string variable source with the square and special move its moving to
+      console.log('emit available_moves')
+      socket.emit('available_moves', source.concat(legalMoves[source][indexOfMove]), aiInfo)
+    }
+
+    onMouseoutSquare()
+  }
+
+  const onMouseoverSquare = (square, piece) => {
+    console.log('onMouseoverSquare')
+
+    // do not pick highlight pieces if the game is over
+    if (winner != null || checkmate || draw) return
+    if (!legalMoves[square]) return
+
+    // gets the coordinate part of the string
+    const onlyLegalMoves = legalMoves[square].map((v) => v.slice(0, 2))
+
+    // exit if theres are no moves available for this square
+    if (onlyLegalMoves.length === 0) return
+
+    // highlight the square they moused over
+    highlightSquare(square)
+
+    // highlight the possible squares for this piece
+    for (let i = 0; i < onlyLegalMoves.length; i++) {
+      highlightSquare(onlyLegalMoves[i])
+    }
+  }
+
+  const onMouseoutSquare = (square, piece) => {
+    console.log('onMouseoutSquare')
+    removeHighlightedSquares()
+  }
+
+  const config = {
+    draggable: true,
+    orientation: playerOrientation,
+    position: 'start',
+    onDragStart: onDragStart,
+    onDrop: onDrop,
+    onMouseoutSquare: onMouseoutSquare,
+    onMouseoverSquare: onMouseoverSquare,
+  }
+  board = Chessboard('myBoard', config)
+
+  if (playerColour === 0) {
+    socket.emit('available_moves')
+  } else {
+    socket.emit('available_moves', null, aiInfo)
+  }
+</script>
+{% endblock %}

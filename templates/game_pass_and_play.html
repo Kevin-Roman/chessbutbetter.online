@@ -25,7 +25,7 @@
   let checkmate = false
   let draw = false
   let turn = 0
-  let legal_moves = null
+  let legalMoves = null
 
   const displayWinner = (winningMethod) => {
     $('#winningMethod').text(winningMethod + '!')
@@ -39,7 +39,7 @@
   socket.on('available_moves_response', ({ available_moves, position, information }) => {
     board.position(position)
 
-    legal_moves = available_moves
+    legalMoves = available_moves
 
     turn = information['current_turn']
     winner = information['winner']
@@ -88,17 +88,17 @@
     console.log('onDrop')
 
     // gets the coordinate part of the string
-    const only_legal_coordinates = legal_moves[source].map((v) => v.slice(0, 2))
+    const onlyLegalCoordinates = legalMoves[source].map((v) => v.slice(0, 2))
 
-    const index_of_move = only_legal_coordinates.indexOf(target)
+    const indexOfMove = onlyLegalCoordinates.indexOf(target)
 
     // only place if move is legal
-    if (index_of_move === -1) {
+    if (indexOfMove === -1) {
       return 'snapback'
     } else {
       // joins the string variable source with the square and special move its moving to
       console.log('emit available_moves')
-      socket.emit('available_moves', source.concat(legal_moves[source][index_of_move]))
+      socket.emit('available_moves', source.concat(legalMoves[source][indexOfMove]))
     }
 
     onMouseoutSquare()
@@ -107,22 +107,22 @@
   const onMouseoverSquare = (square, piece) => {
     console.log('onMouseoverSquare')
 
-    // do not pick highlight piecesif the game is over
+    // do not pick highlight pieces if the game is over
     if (winner != null || checkmate || draw) return
-    if (!legal_moves[square]) return
+    if (!legalMoves[square]) return
 
     // gets the coordinate part of the string
-    const only_legal_coordinates = legal_moves[square].map((v) => v.slice(0, 2))
+    const onlyLegalCoordinates = legalMoves[square].map((v) => v.slice(0, 2))
 
     // exit if theres are no moves available for this square
-    if (only_legal_coordinates.length === 0) return
+    if (onlyLegalCoordinates.length === 0) return
 
     // highlight the square they moused over
     highlightSquare(square)
 
     // highlight the possible squares for this piece
-    for (let i = 0; i < only_legal_coordinates.length; i++) {
-      highlightSquare(only_legal_coordinates[i])
+    for (let i = 0; i < onlyLegalCoordinates.length; i++) {
+      highlightSquare(onlyLegalCoordinates[i])
     }
   }
 

@@ -1,8 +1,13 @@
+from random import randint, choice
+import time
+
 from flask import Flask, render_template, session
 from flask_session import Session
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
+from ai import minimax
+from chessboard import Chessboard
 from game import Game, deserialise
 
 # creates the Flask instance
@@ -43,11 +48,19 @@ def index():
     return "Home page"
 
 
-@app.route('/game-offline')
-def game():
+@app.route('/game-pass-and-play')
+def game_pass_and_play():
     new_game = Game()
     session['game'] = new_game.serialise()
-    return render_template("game.html")
+    return render_template("game_pass_and_play.html")
+
+
+@app.route('/game-ai')
+def game_ai():
+    new_game = Game()
+    session['game'] = new_game.serialise()
+
+    return render_template("game_ai.html")
 
 
 # SocketIO event handlers
@@ -58,9 +71,9 @@ def connect():
     print('connected')
 
 
-# Emits all the legal moves in dictionary format, position dictionary, and game information
+# Emits all the legal moves in dictionary format, position dictionary, and game information. Also executes the computer's move if playing AI gamemode.
 @socketio.on('available_moves')
-def available_moves(move=None):
+def available_moves(move=None, ai_info=None):
     game = deserialise(session.get('game'))
 
     if move is None:
@@ -70,8 +83,6 @@ def available_moves(move=None):
         available_moves_dict = game.next_move(move)
 
         print(game.chess)
-
-    session['game'] = game.serialise()
 
     current_turn = game.get_current_turn()
     winner = game.get_winner()
@@ -83,6 +94,37 @@ def available_moves(move=None):
 
     socketio.emit('available_moves_response', {
         'available_moves': available_moves_dict, 'position': game.position_dictionary(), 'information': information})
+
+    if ai_info is not None and not checkmate and not draw:
+        depth, player_colour = ai_info
+
+        before = time.time()
+        ai_move = choice(minimax(game.chess, depth, player_colour))
+        print(f"Time: {time.time() - before}")
+
+        ai_source = ai_move[0]
+        ai_target, ai_special_move = ai_move[1]
+
+        # make that move
+        game.chess.move_and_special_moves(
+            ai_source, ai_target, ai_special_move)
+
+        game.change_current_turn()
+
+        available_moves_dict = game.available_move_dictionary()
+
+        current_turn = game.get_current_turn()
+        winner = game.get_winner()
+        checkmate = game.get_is_checkmate()
+        draw = game.get_is_draw()
+
+        information = {'current_turn': current_turn,
+                       'winner': winner, 'checkmate': checkmate, 'draw': draw}
+
+        socketio.emit('available_moves_response', {
+            'available_moves': available_moves_dict, 'position': game.position_dictionary(), 'information': information})
+
+    session['game'] = game.serialise()
 
     print('available_moves')
 
