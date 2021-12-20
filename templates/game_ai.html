@@ -131,6 +131,16 @@
     if (winner != null || checkmate || draw) return
     if (!legalMoves[square]) return
 
+    // only highlight if it's the player's turn
+    if (turn !== playerColour) {
+      return
+    }
+
+    // only highlight the player's pieces
+    if ((playerColour === 0 && piece.search(/^b/) !== -1) || (playerColour === 1 && piece.search(/^w/) !== -1)) {
+      return
+    }
+
     // gets the coordinate part of the string
     const onlyLegalMoves = legalMoves[square].map((v) => v.slice(0, 2))
 

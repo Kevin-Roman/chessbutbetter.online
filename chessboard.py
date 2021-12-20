@@ -161,14 +161,33 @@ class Chessboard:
 
             attacked_squares = set(attacked_squares)
 
-            for y, row in enumerate(self.chessboard):
-                for x, square in enumerate(row):
-                    if str(square) == initial+"K":
-                        king_coordinate = (x, y)
-                        break
+            # Check if squares for castling are not attacked
+            if special_move == 4:
+                can_castle = True
+                x2, y2 = coord2
 
-            if king_coordinate not in [attacked_square[0] for attacked_square in attacked_squares]:
-                legal_moves_without_checks.append((coord2, special_move))
+                if x2 == 2:
+                    for i in range(2, 5):
+                        if (i, y2) in [attacked_square[0] for attacked_square in attacked_squares]:
+                            can_castle = False
+
+                elif x2 == 6:
+                    for i in range(4, 7):
+                        if (i, y2) not in [attacked_square[0] for attacked_square in attacked_squares]:
+                            can_castle = False
+
+                if can_castle:
+                    legal_moves_without_checks.append((coord2, special_move))
+
+            else:
+                for y, row in enumerate(self.chessboard):
+                    for x, square in enumerate(row):
+                        if str(square) == initial+"K":
+                            king_coordinate = (x, y)
+                            break
+
+                if king_coordinate not in [attacked_square[0] for attacked_square in attacked_squares]:
+                    legal_moves_without_checks.append((coord2, special_move))
 
             self.undo_move()
 

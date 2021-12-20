@@ -1,5 +1,5 @@
-from random import randint, choice
 import time
+from random import choice
 
 from flask import Flask, render_template, session
 from flask_session import Session
@@ -7,7 +7,6 @@ from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 from ai import minimax
-from chessboard import Chessboard
 from game import Game, deserialise
 
 # creates the Flask instance
@@ -102,14 +101,15 @@ def available_moves(move=None, ai_info=None):
         ai_move = choice(minimax(game.chess, depth, player_colour))
         print(f"Time: {time.time() - before}")
 
-        ai_source = ai_move[0]
-        ai_target, ai_special_move = ai_move[1]
+        ai_source = game.chess.coord_to_notation(ai_move[0])
+        ai_target = game.chess.coord_to_notation(ai_move[1][0])
+        ai_special_move = str(ai_move[1][1])
+
+        if ai_special_move == "None":
+            ai_special_move = ''
 
         # make that move
-        game.chess.move_and_special_moves(
-            ai_source, ai_target, ai_special_move)
-
-        game.change_current_turn()
+        game.next_move(ai_source + ai_target + ai_special_move)
 
         available_moves_dict = game.available_move_dictionary()
 
