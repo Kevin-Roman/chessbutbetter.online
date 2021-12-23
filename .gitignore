@@ -3,3 +3,4 @@ __pycache__
 .vscode
 schema.sql
 sessiondb.sqlite3
+login.db
