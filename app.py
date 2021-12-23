@@ -1,12 +1,13 @@
 import time
 from random import choice
 
-from flask import Flask, render_template, session
+from flask import Flask, flash, redirect, render_template, session, url_for
 from flask_session import Session
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 from ai import minimax
+from forms import LoginForm, RegistrationForm
 from game import Game, deserialise
 
 # creates the Flask instance
@@ -60,6 +61,18 @@ def game_ai():
     session['game'] = new_game.serialise()
 
     return render_template("game_ai.html")
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()
+    return render_template('register.html', form=form)
+
+
+@app.route('/login')
+def login():
+    form = LoginForm()
+    return render_template('login.html', form=form)
 
 
 # SocketIO event handlers
