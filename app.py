@@ -45,7 +45,7 @@ socketio = SocketIO(app)  # ,logger=True, engineio_logger=True
 
 @app.route('/')
 def index():
-    return "Home page"
+    return render_template('index.html')
 
 
 @app.route('/game-pass-and-play')
@@ -66,6 +66,10 @@ def game_ai():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
+    if form.validate_on_submit():
+        # flash sends a one-time alert
+        flash(f'Account has been created for {form.username.data}!', 'success')
+        return redirect(url_for('index'))
     return render_template('register.html', form=form)
 
 
