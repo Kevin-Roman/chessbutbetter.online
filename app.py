@@ -68,7 +68,8 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         # flash sends a one-time alert
-        flash(f'Account has been created for {form.username.data}!', 'success')
+        flash(
+            f'Account has been created for {form.firstname.data}!', 'success')
         return redirect(url_for('index'))
     return render_template('register.html', form=form)
 
@@ -148,16 +149,3 @@ def available_moves(move=None, ai_info=None):
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)
-
-
-"""
-# Joins the user to a room
-@socketio.on('join')
-def on_join_event(data):
-    username = data['username']
-    room = data['room']
-    join_room(room)
-    socketio.emit('join_announcement', username +
-                  ' has entered the room', to=room)
-
-"""
