@@ -1,7 +1,9 @@
+import sqlite3
 import time
 from random import choice
 
 from flask import Flask, flash, redirect, render_template, session, url_for
+from flask_bcrypt import Bcrypt
 from flask_session import Session
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
@@ -33,6 +35,9 @@ app.config['SESSION_SQLALCHEMY'] = db
 # creates the Session object
 # Session instance is not used for direct access, flask.session is used
 Session(app)
+
+# creates the Bcrypt object
+bcrypt = Bcrypt(app)
 
 # adds flask_socketio to the flask application
 socketio = SocketIO(app)  # ,logger=True, engineio_logger=True
@@ -66,11 +71,31 @@ def game_ai():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
+
     if form.validate_on_submit():
+        # hashes the password and converts it using string
+        hashed_password = bcrypt.generate_password_hash(
+            form.password.data).decode('utf-8')
+
+        # establishes a connection
+        conn = sqlite3.connect('./accounts.db')
+        curs = conn.cursor()
+
+        # inserts a row of data
+        curs.execute("INSERT INTO Users (firstname, surname, username, email, password) VALUES (?,?,?,?,?);",
+                     [form.firstname.data, form.surname.data, form.username.data.lower(), form.email.data.lower(), hashed_password])
+
+        # saves the changes
+        conn.commit()
+        # close connection
+        conn.close()
+
         # flash sends a one-time alert
         flash(
-            f'Account has been created for {form.firstname.data}!', 'success')
-        return redirect(url_for('index'))
+            f'Account has been created! Welcome {form.firstname.data}!', 'success')
+
+        return redirect(url_for('login'))
+
     return render_template('register.html', form=form)
 
 
@@ -148,4 +173,14 @@ def available_moves(move=None, ai_info=None):
 
 
 if __name__ == "__main__":
+    clear_tables = False
+
+    if clear_tables:
+        conn = sqlite3.connect("accounts.db")
+        cur = conn.cursor()
+        # pylint: disable=W1514
+        with open('schema.sql') as schema:
+            cur.executescript(schema.read())
+        conn.commit()
+
     socketio.run(app, debug=True)
