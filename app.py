@@ -4,6 +4,7 @@ from random import choice
 
 from flask import Flask, flash, redirect, render_template, session, url_for
 from flask_bcrypt import Bcrypt
+from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user
 from flask_session import Session
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
@@ -37,13 +38,46 @@ app.config['SESSION_SQLALCHEMY'] = db
 Session(app)
 
 # creates the Bcrypt object
+# ! does it use the secret key for hasing?
 bcrypt = Bcrypt(app)
+
+# creates the LoginManager object
+login_manager = LoginManager(app)
 
 # adds flask_socketio to the flask application
 socketio = SocketIO(app)  # ,logger=True, engineio_logger=True
 
 # creates the initial database
 # db.create_all()
+
+
+class User(UserMixin):
+    # pylint: disable=W0622
+    def __init__(self, id, firstname, surname, username, email, password):
+        self.id = id
+        self.firstname = firstname
+        self.surname = surname
+        self.username = username
+        self.email = email
+        self.password = password
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    conn = sqlite3.connect('./accounts.db')
+    curs = conn.cursor()
+
+    curs.execute("SELECT * FROM Users WHERE id = (?);",
+                 [user_id])
+
+    user = curs.fetchone()
+
+    conn.close()
+
+    if user is None:
+        return None
+    else:
+        return User(*user[:-1])
 
 
 # Routes
@@ -70,6 +104,9 @@ def game_ai():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
     form = RegistrationForm()
 
     if form.validate_on_submit():
@@ -99,10 +136,40 @@ def register():
     return render_template('register.html', form=form)
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
     form = LoginForm()
+
+    if form.validate_on_submit():
+        conn = sqlite3.connect('./accounts.db')
+        curs = conn.cursor()
+
+        curs.execute("SELECT * FROM Users WHERE email = (?);",
+                     [form.email.data])
+
+        user = curs.fetchone()
+
+        conn.close()
+
+        print(type(user), user)
+
+        if user is not None and bcrypt.check_password_hash(user[5], form.password.data):
+            user = load_user(user[0])
+            login_user(user, remember=form.remember.data)
+            return redirect(url_for('index'))
+        else:
+            flash('Login Unsuccessful. Please check your email and password.', 'danger')
+
     return render_template('login.html', form=form)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 
 # SocketIO event handlers
