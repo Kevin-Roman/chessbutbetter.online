@@ -173,7 +173,7 @@ class Chessboard:
 
                 elif x2 == 6:
                     for i in range(4, 7):
-                        if (i, y2) not in [attacked_square[0] for attacked_square in attacked_squares]:
+                        if (i, y2) in [attacked_square[0] for attacked_square in attacked_squares]:
                             can_castle = False
 
                 if can_castle:
