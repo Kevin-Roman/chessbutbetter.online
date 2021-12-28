@@ -4,3 +4,4 @@ __pycache__
 schema.sql
 sessiondb.sqlite3
 accounts.db
+config.json

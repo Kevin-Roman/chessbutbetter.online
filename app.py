@@ -10,20 +10,14 @@ from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 from ai import minimax
+from config import Config
 from forms import LoginForm, RegistrationForm
 from game import Game, Game_AI, deserialise
 
 # creates the Flask instance
 app = Flask(__name__)
 
-# secret key that will be used for securely signing the session cookie
-app.config['SECRET_KEY'] = "mysecretkey"
-
-# specifies which type of session interface to use
-app.config['SESSION_TYPE'] = 'sqlalchemy'
-
-# the database URI that should be used for the connection
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sessiondb.sqlite3'
+app.config.from_object(Config)
 
 # Flask-SQLAlchemy will not track modifications of objects and emit signals
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
