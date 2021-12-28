@@ -8,7 +8,8 @@ class Config:
     # specifies which type of session interface to use
     SESSION_TYPE = os.environ.get("SESSION_TYPE")
     # the database URI that should be used for the connection
-    SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        'DATABASE_URL') or os.environ.get("SQLALCHEMY_DATABASE_URI")
 
     MYSQL_HOST = os.environ.get("MYSQL_HOST")
     MYSQL_USER = os.environ.get("MYSQL_USER")
