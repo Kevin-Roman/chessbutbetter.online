@@ -1,1 +1,32 @@
 {% extends "template.html" %}
+{% block scripts %}
+  <style>
+    body {
+      background-image: url('../static/custom/img/background.svg');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div>
+    <img
+      src="../static/custom/img/titles/chessbutbetter.svg"
+      alt="name of the website which is chess but better"
+      width="70%"
+      draggable="false"/>
+  </div>
+  <small class="text-uppercase">The best place to play chess online</small>
+  <div class="d-flex flex-wrap-reverse flex-md-nowrap justify-content-around content my-5">
+    <div class="container plain-chessboard">
+      <img src="../static/custom/img/chessboard.svg" class="img-fluid" alt="chessboard" draggable="false"/>
+    </div>
+    <div class="container center-v">
+      <a href="{{ url_for('play') }}" class="btn btn-outline-dark btn-xlarge fw-bold">Play Now!</a>
+    </div>
+  </div>
+
+  <script></script>
+{% endblock %}

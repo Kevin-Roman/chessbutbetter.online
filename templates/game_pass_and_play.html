@@ -1,5 +1,13 @@
 {% extends "template.html" %}
 {% block scripts %}
+  <style>
+    body {
+      background-image: none;
+    }
+    footer {
+      display: none;
+    }
+  </style>
   <link rel="stylesheet" href="{{ url_for('static', filename='chessboardjs-1.0.0/css/chessboard-1.0.0.css') }}"/>
   <script
     src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -9,10 +17,13 @@
 {% endblock %}
 {% block chessboard %}
 
-  <div id="myBoard" style="width: 500px"></div>
+  <div class="centre-board">
+    <div id="myBoard"></div>
+  </div>
+
+  <button type="button" class="btn btn-outline-dark my-3" onClick="window.location.reload();">Play a new game</button>
   <h2 id="winningMethod"></h2>
   <h2 id="winnerSide"></h2>
-  <button onClick="window.location.reload();">Play a new game</button>
 
   <script type="text/javascript" charset="utf-8">
     const whiteSquareHighlighted = '#a9a9a9'
@@ -78,7 +89,7 @@
       }
 
       // only pick up pieces for the side to move
-      if ((turn === 0 && piece.search(/^b/) !== -1) || (turn === 1 && piece.search(/^w/) !== -1)) { // ! change later to false
+      if ((turn === 0 && piece.search(/^b/) !== -1) || (turn === 1 && piece.search(/^w/) !== -1)) {
         return false
       }
     }
@@ -109,6 +120,11 @@
       }
 
       if (! legalMoves[square]) {
+        return
+      }
+
+      // only highlight if it's the player's turn
+      if ((turn === 0 && piece.search(/^b/) !== -1) || (turn === 1 && piece.search(/^w/) !== -1)) {
         return
       }
 
@@ -144,6 +160,12 @@
     }
     board = Chessboard('myBoard', config)
 
+    board.resize()
+
     socket.emit('available_moves')
+
+    window.addEventListener('resize', (event) => {
+      board.resize()
+    }, true)
   </script>
 {% endblock %}

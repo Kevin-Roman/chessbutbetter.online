@@ -1,0 +1,96 @@
+body {
+    font-family: "Montserrat", sans-serif;
+}
+
+nav {
+    box-shadow: 0 8px 10px #cccccc;
+}
+
+.btn-outline-dark {
+    color: white;
+    background-color: #432617;
+    border-color: white;
+}
+
+.btn-outline-dark:hover {
+    color: #432617;
+    background-color: white;
+    border-color: #432617;
+}
+
+main {
+    min-height: 80vh;
+}
+
+footer {
+    font-size: small;
+}
+
+.center-v {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-xlarge {
+    padding: 1rem 2rem;
+    font-size: 2rem;
+    line-height: normal;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+}
+
+.centre-board {
+    max-width: 65vh;
+    margin: auto auto;
+}
+
+@media screen and (max-width: 576px) {
+    .plain-chessboard {
+        display: none;
+    }
+}
+
+.btn {
+    border-radius: 18px;
+}
+
+.svg-chessboard {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: -1;
+}
+
+.form-section {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 18px;
+}
+
+.form-control {
+    background-color: #08748c;
+    color: white;
+    border-radius: 14px;
+}
+
+.form-control:focus {
+    background-color: #08748c;
+    color: white;
+    border-radius: 14px;
+}
+
+.form-check-input:checked {
+    background-color: #08748c;
+    border-color: #08748c;
+}
+
+a {
+    color: #432617;
+}
+
+a:hover {
+    color: #08748c;
+}

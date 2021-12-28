@@ -1,5 +1,13 @@
 {% extends "template.html" %}
 {% block scripts %}
+  <style>
+    body {
+      background-image: none;
+    }
+    footer {
+      display: none;
+    }
+  </style>
   <link rel="stylesheet" href="{{ url_for('static', filename='chessboardjs-1.0.0/css/chessboard-1.0.0.css') }}"/>
   <script
     src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -9,10 +17,22 @@
 {% endblock %}
 {% block chessboard %}
 
-  <div id="myBoard" style="width: 500px"></div>
-  <h2 id="winningMethod"></h2>
-  <h2 id="winnerSide"></h2>
-  <button onClick="window.location.reload();">Play a new game</button>
+  <h4 class="fw-bold">AI</h4>
+
+  <div class="centre-board mb-2">
+    <div id="myBoard"></div>
+  </div>
+
+  {% if current_user.is_anonymous %}
+    <h4 class="fw-bold">Player 1</h4>
+  {% else %}
+    <h4 class="fw-bold">{{ current_user.username }}</h4>
+  {% endif %}
+
+  <button type="button" class="btn btn-outline-dark my-2" onClick="window.location.reload();">Play a new game</button>
+  <br/>
+  <h3 id="winningMethod" class="d-inline"></h3>
+  <h3 id="winnerSide" class="d-inline"></h3>
 
   <script type="text/javascript" charset="utf-8">
     const whiteSquareHighlighted = '#a9a9a9'
@@ -174,10 +194,16 @@
     }
     board = Chessboard('myBoard', config)
 
+    board.resize()
+
     if (playerColour === 0) {
       socket.emit('available_moves')
     } else {
       socket.emit('ai_moves', playerColour)
     }
+
+    window.addEventListener('resize', (event) => {
+      board.resize()
+    }, true)
   </script>
 {% endblock %}
