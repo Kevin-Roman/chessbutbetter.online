@@ -214,7 +214,7 @@ def available_moves(move=None):
                    'winner': winner, 'checkmate': checkmate, 'draw': draw}
 
     socketio.emit('available_moves_response', {
-        'available_moves': available_moves_dict, 'position': game.position_dictionary(), 'information': information})
+        'available_moves': available_moves_dict, 'position': game.position_dictionary(), 'information': information}, room=request.sid)
 
 
 # AI makes next move and then emits all the legal moves in dictionary format, position dictionary, and game information.
@@ -249,7 +249,7 @@ def ai_moves(player_colour):
                    'winner': winner, 'checkmate': checkmate, 'draw': draw}
 
     socketio.emit('available_moves_response', {
-        'available_moves': available_moves_dict, 'position': game.position_dictionary(), 'information': information})
+        'available_moves': available_moves_dict, 'position': game.position_dictionary(), 'information': information}, room=request.sid)
 
     print('available_moves')
 
