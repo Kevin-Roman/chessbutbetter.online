@@ -1,5 +1,3 @@
-import sqlite3
-
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
@@ -25,31 +23,35 @@ class RegistrationForm(FlaskForm):
 
     submit = SubmitField('Sign Up')
 
+    def __init__(self, mysql):
+        super().__init__()
+        self.mysql = mysql
+
     def validate_username(self, username):
-        conn = sqlite3.connect('./accounts.db')
+        conn = self.mysql.connection
         curs = conn.cursor()
 
-        curs.execute("SELECT * FROM Users WHERE username = (?);",
+        curs.execute("""SELECT * FROM Users WHERE username = (%s);""",
                      [username.data.lower()])
 
         user = curs.fetchone()
 
-        conn.close()
+        curs.close()
 
         if user is not None:
             raise ValidationError(
                 'That username is take. Please choose a different one.')
 
     def validate_email(self, email):
-        conn = sqlite3.connect('./accounts.db')
+        conn = self.mysql.connection
         curs = conn.cursor()
 
-        curs.execute("SELECT * FROM Users WHERE email = (?);",
+        curs.execute("""SELECT * FROM Users WHERE email = (%s);""",
                      [email.data.lower()])
 
         user = curs.fetchone()
 
-        conn.close()
+        curs.close()
 
         if user is not None:
             raise ValidationError(

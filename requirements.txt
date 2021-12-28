@@ -12,6 +12,7 @@ eventlet==0.33.0
 Flask==2.0.2
 Flask-Bcrypt==0.7.1
 Flask-Login==0.5.0
+Flask-MySQLdb==0.2.0
 Flask-Session==0.4.0
 Flask-SocketIO==5.1.1
 Flask-SQLAlchemy==2.5.1
@@ -27,6 +28,7 @@ jsonpickle==2.0.0
 lazy-object-proxy==1.6.0
 MarkupSafe==2.0.1
 mccabe==0.6.1
+mysqlclient==2.1.0
 platformdirs==2.4.0
 pycodestyle==2.8.0
 pycparser==2.21

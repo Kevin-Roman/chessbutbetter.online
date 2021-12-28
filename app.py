@@ -1,10 +1,10 @@
-import sqlite3
 import time
 from random import choice
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, current_user, login_user, logout_user
+from flask_mysqldb import MySQL
 from flask_session import Session
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
@@ -30,6 +30,8 @@ app.config['SESSION_SQLALCHEMY'] = db
 # creates the Session object
 # Session instance is not used for direct access, flask.session is used
 Session(app)
+
+mysql = MySQL(app)
 
 # creates the Bcrypt object
 # ! does it use the secret key for hasing?
@@ -58,15 +60,15 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    conn = sqlite3.connect('./accounts.db')
+    conn = mysql.connection
     curs = conn.cursor()
 
-    curs.execute("SELECT * FROM Users WHERE id = (?);",
+    curs.execute("""SELECT * FROM Users WHERE id = (%s);""",
                  [user_id])
 
     user = curs.fetchone()
 
-    conn.close()
+    curs.close()
 
     if user is None:
         return None
@@ -111,7 +113,7 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
 
-    form = RegistrationForm()
+    form = RegistrationForm(mysql)
 
     if form.validate_on_submit():
         # hashes the password and converts it using string
@@ -119,17 +121,17 @@ def register():
             form.password.data).decode('utf-8')
 
         # establishes a connection
-        conn = sqlite3.connect('./accounts.db')
+        conn = mysql.connection
         curs = conn.cursor()
 
         # inserts a row of data
-        curs.execute("INSERT INTO Users (firstname, surname, username, email, password) VALUES (?,?,?,?,?);",
+        curs.execute("""INSERT INTO Users (firstname, surname, username, email, password) VALUES (%s,%s,%s,%s,%s);""",
                      [form.firstname.data, form.surname.data, form.username.data.lower(), form.email.data.lower(), hashed_password])
 
         # saves the changes
         conn.commit()
         # close connection
-        conn.close()
+        curs.close()
 
         # flash sends a one-time alert
         flash(
@@ -148,15 +150,15 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        conn = sqlite3.connect('./accounts.db')
+        conn = mysql.connection
         curs = conn.cursor()
 
-        curs.execute("SELECT * FROM Users WHERE email = (?);",
+        curs.execute("""SELECT * FROM Users WHERE email = (%s);""",
                      [form.email.data])
 
         user = curs.fetchone()
 
-        conn.close()
+        curs.close()
 
         print(type(user), user)
 
