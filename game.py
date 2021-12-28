@@ -137,6 +137,16 @@ class Game:
         return jsonpickle.encode(self)
 
 
+class Game_AI(Game):
+    def __init__(self, depth):
+        super().__init__()
+
+        self._depth = depth
+
+    def get_depth(self):
+        return self._depth
+
+
 if __name__ == "__main__":
     game = Game()
     print(game.chess)

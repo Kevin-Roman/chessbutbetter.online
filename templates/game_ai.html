@@ -25,7 +25,6 @@
     let turn = 0
     let legalMoves = null
 
-    let depth = 2
     let playerOrientation
 
     // Picks the side the player will play on
@@ -38,8 +37,6 @@
       playerOrientation = 'black'
     }
     console.log(playerOrientation)
-
-    let aiInfo = [depth, playerColour]
 
     const displayWinner = (winningMethod) => {
       $('#winningMethod').text(winningMethod + '!')
@@ -65,6 +62,8 @@
         displayWinner('Checkmate', winner)
       } else if (draw) {
         displayWinner('Stalemate', winner)
+      } else if (turn !== playerColour) {
+        socket.emit('ai_moves', playerColour)
       }
 
       console.log('available_moves_response')
@@ -117,7 +116,7 @@
         return 'snapback'
       } else { // joins the string variable source with the square and special move its moving to
         console.log('emit available_moves')
-        socket.emit('available_moves', source.concat(legalMoves[source][indexOfMove]), aiInfo)
+        socket.emit('available_moves', source.concat(legalMoves[source][indexOfMove]))
       } onMouseoutSquare()
     }
 
@@ -178,7 +177,7 @@
     if (playerColour === 0) {
       socket.emit('available_moves')
     } else {
-      socket.emit('available_moves', null, aiInfo)
+      socket.emit('ai_moves', playerColour)
     }
   </script>
 {% endblock %}
