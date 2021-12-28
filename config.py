@@ -12,6 +12,7 @@ class Config:
     if uri is not None:
         if uri and uri.startswith("postgres://"):
             uri = uri.replace("postgres://", "postgresql://", 1)
+            SQLALCHEMY_DATABASE_URI = uri
     else:
         SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
 
@@ -27,7 +28,14 @@ class Config:
 
         SECRET_KEY = config.get('SECRET_KEY')
         SESSION_TYPE = config.get('SESSION_TYPE')
-        SQLALCHEMY_DATABASE_URI = config.get('SQLALCHEMY_DATABASE_URI')
+        uri = config.get('DATABASE_URL')
+        print(uri)
+        if uri is not None:
+            if uri and uri.startswith("postgres://"):
+                uri = uri.replace("postgres://", "postgresql://", 1)
+                SQLALCHEMY_DATABASE_URI = uri
+        else:
+            SQLALCHEMY_DATABASE_URI = config.get('SQLALCHEMY_DATABASE_URI')
         MYSQL_HOST = config.get("MYSQL_HOST")
         MYSQL_USER = config.get("MYSQL_USER")
         MYSQL_PASSWORD = config.get("MYSQL_PASSWORD")

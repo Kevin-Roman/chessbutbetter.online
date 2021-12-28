@@ -44,7 +44,7 @@ login_manager = LoginManager(app)
 socketio = SocketIO(app)  # ,logger=True, engineio_logger=True
 
 # creates the initial database
-# db.create_all()
+db.create_all()
 
 
 class User(UserMixin):
