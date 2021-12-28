@@ -249,14 +249,4 @@ def ai_moves(player_colour):
 
 
 if __name__ == "__main__":
-    clear_tables = False
-
-    if clear_tables:
-        conn = sqlite3.connect("accounts.db")
-        cur = conn.cursor()
-        # pylint: disable=W1514
-        with open('schema.sql') as schema:
-            cur.executescript(schema.read())
-        conn.commit()
-
     socketio.run(app, debug=True)
