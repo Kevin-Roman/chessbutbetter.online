@@ -87,6 +87,11 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/play')
+def play():
+    return render_template('play.html')
+
+
 @app.route('/game-pass-and-play')
 def game_pass_and_play():
     new_game = Game()
