@@ -299,24 +299,19 @@ class Chessboard:
 
                     legal = False
 
-                    match value:
-                        case 1:
-                            legal = self.case_1(square1, square2)
+                    if value == 1:
+                        legal = self.case_1(square1, square2)
+                    elif value == 2:
+                        legal = self.can_pawn_double_step(square1, coord)
+                    elif value == 3:
+                        legal = self.can_pawn_capture(square1, square2)
 
-                        case 2:
-                            legal = self.can_pawn_double_step(square1, coord)
-
-                        case 3:
-                            legal = self.can_pawn_capture(
-                                square1, square2)
-
-                            if not legal:
-                                legal = self.can_enpassant(square1, coord2)
-                                if legal:
-                                    value = 5
-
-                        case 4:
-                            legal = self.can_castle(square1, coord, coord2)
+                        if not legal:
+                            legal = self.can_enpassant(square1, coord2)
+                            if legal:
+                                value = 5
+                    elif value == 4:
+                        legal = self.can_castle(square1, coord, coord2)
 
                     if legal:
                         legal_moves.append((coord2, value))
