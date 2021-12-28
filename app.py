@@ -99,7 +99,7 @@ def game_pass_and_play():
 def game_ai():
     depth = request.args.get('depth')
 
-    if depth is None or not isinstance(depth, int) or int(depth) not in [1, 2, 3, 4]:
+    if depth is None or not depth.isdigit or int(depth) not in [1, 2, 3, 4]:
         return redirect(url_for('play'))
 
     new_game = Game_AI(int(depth))
