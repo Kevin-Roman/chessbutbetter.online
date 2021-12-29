@@ -29,7 +29,6 @@ class Config:
         SECRET_KEY = config.get('SECRET_KEY')
         SESSION_TYPE = config.get('SESSION_TYPE')
         uri = config.get('DATABASE_URL')
-        print(uri)
         if uri is not None:
             if uri and uri.startswith("postgres://"):
                 uri = uri.replace("postgres://", "postgresql://", 1)

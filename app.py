@@ -219,7 +219,7 @@ def available_moves(move=None):
 def ai_moves(player_colour):
     game = deserialise(session.get('game'))
 
-    before = time.time()
+    # before = time.time()
     ai_move = choice(minimax(game.chess, game.get_depth(), player_colour))
     # print(f"Time: {time.time() - before}")
 
