@@ -160,7 +160,7 @@ def login():
 
         curs.close()
 
-        print(type(user), user)
+        # print(type(user), user)
 
         if user is not None and bcrypt.check_password_hash(user[5], form.password.data):
             user = load_user(user[0])
@@ -183,7 +183,8 @@ def logout():
 # Function that is run after a connection is established
 @socketio.on('socket_connect')
 def connect():
-    print('connected')
+    pass
+    # print('connected')
 
 
 # Emits all the legal moves in dictionary format, position dictionary, and game information.
@@ -194,10 +195,10 @@ def available_moves(move=None):
     if move is None:
         available_moves_dict = game.available_move_dictionary()
     else:
-        # print(f"\n\n{move}\n\n")
+        print(f"\n\n{move}\n\n")
         available_moves_dict = game.next_move(move)
 
-        print(game.chess)
+        # print(game.chess)
 
     session['game'] = game.serialise()
 
@@ -220,7 +221,7 @@ def ai_moves(player_colour):
 
     before = time.time()
     ai_move = choice(minimax(game.chess, game.get_depth(), player_colour))
-    print(f"Time: {time.time() - before}")
+    # print(f"Time: {time.time() - before}")
 
     ai_source = game.chess.coord_to_notation(ai_move[0])
     ai_target = game.chess.coord_to_notation(ai_move[1][0])
@@ -247,7 +248,7 @@ def ai_moves(player_colour):
     socketio.emit('available_moves_response', {
         'available_moves': available_moves_dict, 'position': game.position_dictionary(), 'information': information}, room=request.sid)
 
-    print('available_moves')
+    # print('available_moves')
 
 
 if __name__ == "__main__":

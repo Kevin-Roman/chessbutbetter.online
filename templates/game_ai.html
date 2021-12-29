@@ -49,14 +49,14 @@
 
     // Picks the side the player will play on
     const playerColour = Math.floor(Math.random() * 2)
-    console.log(playerColour)
+    // console.log(playerColour)
 
     if (playerColour === 0) {
       playerOrientation = 'white'
     } else {
       playerOrientation = 'black'
     }
-    console.log(playerOrientation)
+    // console.log(playerOrientation)
 
     const displayWinner = (winningMethod) => {
       $('#winningMethod').text(winningMethod + '!')
@@ -76,7 +76,7 @@
       winner = information['winner']
       checkmate = information['checkmate']
       draw = information['draw']
-      console.log(winner, checkmate, draw)
+      // console.log(winner, checkmate, draw)
 
       if (checkmate) {
         displayWinner('Checkmate', winner)
@@ -86,7 +86,7 @@
         socket.emit('ai_moves', playerColour)
       }
 
-      console.log('available_moves_response')
+      // console.log('available_moves_response')
     })
 
     const removeHighlightedSquares = () => {
@@ -104,10 +104,7 @@
       $square.css('background', background)
     }
 
-    const onDragStart = (source, piece, position, orientation) => {
-      console.log('onDragStart')
-      //console.log(piece)
-      // do not pick up pieces if the game is over
+    const onDragStart = (source, piece, position, orientation) => { // console.log('onDragStart') console.log(piece) do not pick up pieces if the game is over
       if (winner != null || checkmate || draw) {
         return false
       }
@@ -124,7 +121,7 @@
     }
 
     const onDrop = (source, target) => {
-      console.log('onDrop')
+      // console.log('onDrop')
 
       // gets the coordinate part of the string
       const onlyLegalCoordinates = legalMoves[source].map((v) => v.slice(0, 2))
@@ -134,14 +131,13 @@
       // only place if move is legal
       if (indexOfMove === -1) {
         return 'snapback'
-      } else { // joins the string variable source with the square and special move its moving to
-        console.log('emit available_moves')
+      } else { // joins the string variable source with the square and special move its moving to console.log('emit available_moves')
         socket.emit('available_moves', source.concat(legalMoves[source][indexOfMove]))
       } onMouseoutSquare()
     }
 
     const onMouseoverSquare = (square, piece) => {
-      console.log('onMouseoverSquare')
+      // console.log('onMouseoverSquare')
 
       // do not pick highlight pieces if the game is over
       if (winner != null || checkmate || draw) {

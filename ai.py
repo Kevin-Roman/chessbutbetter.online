@@ -86,7 +86,7 @@ def maximise(chessboard, depth, alpha, beta, player_colour, best_move_wanted):
                         break
 
     if best_move_wanted:
-        print(f"score: {max_eval}")
+        # print(f"score: {max_eval}")
         # return the best move
         return best_move
 
