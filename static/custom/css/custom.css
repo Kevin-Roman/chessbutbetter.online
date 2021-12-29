@@ -50,6 +50,11 @@ footer {
     .plain-chessboard {
         display: none;
     }
+    .centre-board {
+        max-width: 90%;
+        margin: 0 0;
+    }
+
 }
 
 .btn {
@@ -93,4 +98,8 @@ a {
 
 a:hover {
     color: #08748c;
+}
+
+body {
+    overscroll-behavior-y: contain;
 }

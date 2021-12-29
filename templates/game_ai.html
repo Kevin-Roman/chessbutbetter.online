@@ -60,10 +60,12 @@
 
     const displayWinner = (winningMethod) => {
       $('#winningMethod').text(winningMethod + '!')
-      if (winner === 0) {
-        $('#winnerSide').text('White wins!')
-      } else {
-        $('#winnerSide').text('Black wins!')
+      if (winningMethod !== 'Stalemate') {
+        if (winner === 0) {
+          $('#winnerSide').text('White wins!')
+        } else {
+          $('#winnerSide').text('Black wins!')
+        }
       }
     }
 
@@ -118,9 +120,12 @@
       if ((playerColour === 0 && piece.search(/^b/) !== -1) || (playerColour === 1 && piece.search(/^w/) !== -1)) {
         return false
       }
+
+      onMouseoverSquare(source, piece)
     }
 
     const onDrop = (source, target) => {
+      onMouseoutSquare()
       // console.log('onDrop')
 
       // gets the coordinate part of the string
@@ -133,7 +138,7 @@
         return 'snapback'
       } else { // joins the string variable source with the square and special move its moving to console.log('emit available_moves')
         socket.emit('available_moves', source.concat(legalMoves[source][indexOfMove]))
-      } onMouseoutSquare()
+      }
     }
 
     const onMouseoverSquare = (square, piece) => {
@@ -174,8 +179,7 @@
       }
     }
 
-    const onMouseoutSquare = (square, piece) => {
-      console.log('onMouseoutSquare')
+    const onMouseoutSquare = (square, piece) => { // console.log('onMouseoutSquare')
       removeHighlightedSquares()
     }
 

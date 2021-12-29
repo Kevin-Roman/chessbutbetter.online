@@ -66,8 +66,8 @@
       </nav>
     </header>
 
-    <main>
-      <div class="text-center container mt-5">
+    <main class="container">
+      <div class="text-center mt-5">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
