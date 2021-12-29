@@ -195,7 +195,7 @@ def available_moves(move=None):
     if move is None:
         available_moves_dict = game.available_move_dictionary()
     else:
-        print(f"\n\n{move}\n\n")
+        # print(f"\n\n{move}\n\n")
         available_moves_dict = game.next_move(move)
 
         # print(game.chess)

@@ -27,7 +27,7 @@
 
   <script type="text/javascript" charset="utf-8">
     const whiteSquareHighlighted = '#a9a9a9'
-    const blackSquareHighlighted = '#696969'
+    const blackSquareHighlighted = '#3E3524'
 
     let board = null
     let winner = null
@@ -82,8 +82,7 @@
 
     const onDragStart = (source, piece, position, orientation) => {
       console.log('onDragStart')
-      //console.log(piece)
-      // do not pick up pieces if the game is over
+      // console.log(piece) do not pick up pieces if the game is over
       if (winner != null || checkmate || draw) {
         return false
       }
