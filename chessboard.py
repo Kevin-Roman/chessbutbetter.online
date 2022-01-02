@@ -18,7 +18,7 @@ class Chessboard:
             [Rook(0), Knight(0), Bishop(0), Queen(0),
              King(0), Bishop(0), Knight(0), Rook(0)]]
 
-        self._history = []
+        self.history = []
 
     # Gets the element of the chessboad with the specific coordinate
     def get_square(self, coord):
@@ -29,15 +29,15 @@ class Chessboard:
         self.chessboard[coord[1]][coord[0]] = new_value
 
     def get_history(self):
-        return self._history
+        return self.history
 
     def append_history(self, previous_square, new_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move):
-        self._history.append((previous_square, new_square,
+        self.history.append((previous_square, new_square,
                              piece_attributes, captured_piece, pawn_enpassant, rook_castling_move))
 
     # Undo the last move
     def undo_move(self):
-        old_square, current_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move = self._history.pop()
+        old_square, current_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move = self.history.pop()
 
         self.move(current_square, old_square)
 
@@ -52,7 +52,7 @@ class Chessboard:
             # Move the rook back to its previous position
             self.move(rook_castling_move[1], rook_castling_move[0])
             self.chessboard[rook_castling_move[0][1]
-                            ][rook_castling_move[0][0]].set_already_moved(False)
+                            ][rook_castling_move[0][0]].already_moved = False
 
         self.get_square(old_square).__dict__ = piece_attributes
 
@@ -72,13 +72,13 @@ class Chessboard:
 
     # Moves a piece to a different square, and takes into consideration special moves such as enpassant and castling
     def move_and_special_moves(self, coord1, coord2, special_move):
-        colour = self.get_square(coord1).get_colour()
+        colour = self.get_square(coord1).colour
 
         piece_attributes, captured_piece = self.move(coord1, coord2)
 
         x2, y2 = coord2
 
-        self.chessboard[y2][x2].set_already_moved(True)
+        self.chessboard[y2][x2].already_moved = True
 
         pawn_enpassant = None
         rook_castling_move = None
@@ -110,14 +110,14 @@ class Chessboard:
                 self.move(rook_castling_move[0], rook_castling_move[1])
 
         # promotion
-        if self.get_square(coord2) != 0 and self.get_square(coord2).get_name() == "Pawn":
+        if self.get_square(coord2) != 0 and self.get_square(coord2).name == "Pawn":
             if colour == 0 and y2 == 0:
                 self.set_square(coord2, Queen(0))
-                self.chessboard[y2][x2].set_already_moved(True)
+                self.chessboard[y2][x2].already_moved = True
 
             elif colour == 1 and y2 == 7:
                 self.set_square(coord2, Queen(1))
-                self.chessboard[y2][x2].set_already_moved(True)
+                self.chessboard[y2][x2].already_moved = True
 
         self.append_history(coord1, coord2, piece_attributes, captured_piece,
                             pawn_enpassant, rook_castling_move)
@@ -139,7 +139,7 @@ class Chessboard:
     # Removes the moves that would lead to a self discovered check
     def remove_checks(self, coord1, legal_moves):
         legal_moves_without_checks = []
-        colour = self.get_square(coord1).get_colour()
+        colour = self.get_square(coord1).colour
 
         if colour == 0:
             initial = "w"
@@ -153,7 +153,7 @@ class Chessboard:
 
             for y, row in enumerate(self.chessboard):
                 for x, square in enumerate(row):
-                    if square != 0 and square.get_colour() != colour:
+                    if square != 0 and square.colour != colour:
                         attacked_squares.extend(
                             self.legal_specific_move((x, y)))
                         attacked_squares.extend(
@@ -201,7 +201,7 @@ class Chessboard:
             for num_column, _ in enumerate(row):
                 coord = (num_column, num_row)
                 square = self.get_square(coord)
-                if square != 0 and square.get_colour() == turn:
+                if square != 0 and square.colour == turn:
                     legal_moves = self.get_all_legal_moves(coord)
                     if legal_moves != []:
                         all_legal_moves.append(legal_moves)
@@ -214,7 +214,7 @@ class Chessboard:
 
             for y, row in enumerate(self.chessboard):
                 for x, square in enumerate(row):
-                    if square != 0 and square.get_colour() != turn:
+                    if square != 0 and square.colour != turn:
                         attacked_squares.extend(
                             self.legal_specific_move((x, y)))
                         attacked_squares.extend(
@@ -224,7 +224,7 @@ class Chessboard:
 
             for y, row in enumerate(self.chessboard):
                 for x, square in enumerate(row):
-                    if square != 0 and square.get_colour() == turn and str(square)[1] == "K":
+                    if square != 0 and square.colour == turn and str(square)[1] == "K":
                         king_coordinate = (x, y)
                         break
 
@@ -262,7 +262,7 @@ class Chessboard:
                 if square2 == 0:
                     legal_moves.append((coord2, None))
                 else:
-                    if square1.get_colour() != square2.get_colour():
+                    if square1.colour != square2.colour:
                         legal_moves.append((coord2, None))
 
                     break
@@ -275,7 +275,7 @@ class Chessboard:
     # Returns a list of legal specific moves the pawn, knight, and king can make
     def legal_specific_move(self, coord):
         square1 = self.get_square(coord)
-        available_moves = square1.get_available_moves()
+        available_moves = square1.available_moves
         x_square1, y_square1 = coord
         x_moves_center, y_moves_center = (0, 0)
 
@@ -324,7 +324,7 @@ class Chessboard:
         if square2 == 0:
             return True
 
-        elif square1.get_name() != "Pawn" and square1.get_colour() != square2.get_colour():
+        elif square1.name != "Pawn" and square1.colour != square2.colour:
             return True
 
         return False
@@ -332,9 +332,9 @@ class Chessboard:
     # Checks if a pawn can do a double step move
     def can_pawn_double_step(self, square, coord):
         x, y = coord
-        colour = square.get_colour()
+        colour = square.colour
 
-        if square.get_already_moved():
+        if square.already_moved:
             return False
 
         if colour == 0:
@@ -351,15 +351,15 @@ class Chessboard:
     # Checks if a pawn can capture a piece
     def can_pawn_capture(self, square1, square2):
         if square2 != 0:
-            if square1.get_colour() != square2.get_colour():
+            if square1.colour != square2.colour:
                 return True
 
         return False
 
     # check if a pawn can do the 'en passant' move
     def can_enpassant(self, square, coord2):
-        history = self.get_history()
-        colour = square.get_colour()
+        history = self.history
+        colour = square.colour
         x, y = coord2
 
         if colour == 0:
@@ -379,7 +379,7 @@ class Chessboard:
         under_square = self.get_square((x, y+i))
 
         if under_square != 0:
-            if under_square.get_name() == "Pawn" and under_square.get_colour() != colour:
+            if under_square.name == "Pawn" and under_square.colour != colour:
                 return True
 
         return False
@@ -389,7 +389,7 @@ class Chessboard:
         x1, y1 = coord1
         x2, _ = coord2
 
-        if not square1.get_already_moved():
+        if not square1.already_moved:
             if x2 < 4:
                 for i in range(1, x1):
                     if self.get_square((x1-i, y1)) != 0:
@@ -397,7 +397,7 @@ class Chessboard:
 
                 rook = self.get_square((0, y1))
 
-                if rook != 0 and not rook.get_already_moved():
+                if rook != 0 and not rook.already_moved:
                     return True
             else:
                 for i in range(1, 7-x1):
@@ -406,7 +406,7 @@ class Chessboard:
 
                 rook = self.get_square((7, y1))
 
-                if rook != 0 and not rook.get_already_moved():
+                if rook != 0 and not rook.already_moved:
                     return True
 
         return False

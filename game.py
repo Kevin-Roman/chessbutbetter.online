@@ -13,47 +13,26 @@ def deserialise(serialised_object):
 class Game:
     def __init__(self):
         self.chess = Chessboard()
-        self._current_turn = 0
-        self._winner = None
-        self._checkmate = False
-        self._draw = False
-
-    def get_current_turn(self):
-        return self._current_turn
+        self.current_turn = 0
+        self.winner = None
+        self.is_checkmate = False
+        self.is_draw = False
 
     def change_current_turn(self):
-        if self._current_turn == 0:
-            self._current_turn = 1
+        if self.current_turn == 0:
+            self.current_turn = 1
         else:
-            self._current_turn = 0
-
-    def get_winner(self):
-        return self._winner
-
-    def set_winner(self, winner_id=None):
-        self._winner = winner_id
-
-    def get_is_checkmate(self):
-        return self._checkmate
-
-    def set_is_checkmate(self, checkmate=False):
-        self._checkmate = checkmate
-
-    def get_is_draw(self):
-        return self._draw
-
-    def set_is_draw(self, draw=False):
-        self._draw = draw
+            self.current_turn = 0
 
     # Sets the winner, checkmate, and draw attributes if game has ended
     def end_game(self, winner_id, checkmate_or_draw):
         if checkmate_or_draw == 'checkmate':
-            self.set_is_checkmate(True)
+            self.is_checkmate = True
 
         elif checkmate_or_draw == 'draw':
-            self.set_is_draw(True)
+            self.is_draw = True
 
-        self.set_winner(winner_id)
+        self.winner = winner_id
 
     # Executes the legal move, and returns all the new legal_moves
     def next_move(self, move, mutual_draw=False):
@@ -77,12 +56,12 @@ class Game:
 
         # checks the opposing side if they have any legal_moves to make. If they don't then its end game.
         is_checkmate_or_draw = self.chess.is_checkmate_or_draw(
-            self.get_current_turn())
+            self.current_turn)
 
-        # print(self.get_current_turn(), str(is_checkmate_or_draw))
+        # print(self.current_turn, str(is_checkmate_or_draw))
 
         if is_checkmate_or_draw:
-            if self.get_current_turn() == 0:
+            if self.current_turn == 0:
                 winner_colour = 1
             else:
                 winner_colour = 0
@@ -156,8 +135,8 @@ if __name__ == "__main__":
     print(game.chess)
 
     game.end_game(1, 'checkmate')
-    print(game.get_winner(), game.get_is_checkmate())
+    print(game.winner, game.is_checkmate)
     game.end_game(2, 'draw')
-    print(game.get_winner(), game.get_is_draw())
+    print(game.winner, game.is_draw)
 
     print(game.position_dictionary())

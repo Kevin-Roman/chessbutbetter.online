@@ -7,10 +7,10 @@ eval_position = {"P": 1, "B": 3, "N": 3, "R": 5, "Q": 9, "K": 1000}
 
 # Receives a piece and returns its respective value depending on type and colour
 def piece_value(piece, player_colour):
-    value = eval_position[piece.get_name()[0]]
+    value = eval_position[piece.name[0]]
 
     # If the colour of the piece is the same as the player's colour then the value value is turned negative
-    if piece.get_colour() == player_colour:
+    if piece.colour == player_colour:
         value *= -1
 
     return value
@@ -54,7 +54,7 @@ def maximise(chessboard, depth, alpha, beta, player_colour, best_move_wanted):
             coord = (num_column, num_row)
             square = chessboard.get_square(coord)
 
-            if square != 0 and square.get_colour() != player_colour:
+            if square != 0 and square.colour != player_colour:
                 all_moves = chessboard.get_all_legal_moves(coord)
 
                 # Get the best possible move the computer could make
@@ -107,7 +107,7 @@ def minimise(chessboard, depth, alpha, beta, player_colour):
             coord = (num_column, num_row)
             square = chessboard.get_square(coord)
 
-            if square != 0 and square.get_colour() == player_colour:
+            if square != 0 and square.colour == player_colour:
                 all_moves = chessboard.get_all_legal_moves(coord)
 
                 # Get the best possible move the player could make
@@ -161,7 +161,7 @@ if __name__ == "__main__":
         print(chess.get_all_legal_moves(source))
 
         # validation to see if the move is legal for the user to make.
-        if (target, special_move) in chess.get_all_legal_moves(source) and piece != 0 and piece.get_colour() == 0:
+        if (target, special_move) in chess.get_all_legal_moves(source) and piece != 0 and piece.colour == 0:
             # make the player's move
             chess.move_and_special_moves(source, target, special_move)
 

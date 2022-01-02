@@ -1,4 +1,4 @@
-import time
+# import time
 from random import choice
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
@@ -202,10 +202,10 @@ def available_moves(move=None):
 
     session['game'] = game.serialise()
 
-    current_turn = game.get_current_turn()
-    winner = game.get_winner()
-    checkmate = game.get_is_checkmate()
-    draw = game.get_is_draw()
+    current_turn = game.current_turn
+    winner = game.winner
+    checkmate = game.is_checkmate
+    draw = game.is_draw
 
     information = {'current_turn': current_turn,
                    'winner': winner, 'checkmate': checkmate, 'draw': draw}
@@ -220,7 +220,7 @@ def ai_moves(player_colour):
     game = deserialise(session.get('game'))
 
     # before = time.time()
-    ai_move = choice(minimax(game.chess, game.get_depth(), player_colour))
+    ai_move = choice(minimax(game.chess, game.depth, player_colour))
     # print(f"Time: {time.time() - before}")
 
     ai_source = game.chess.coord_to_notation(ai_move[0])
@@ -237,10 +237,10 @@ def ai_moves(player_colour):
 
     available_moves_dict = game.available_move_dictionary()
 
-    current_turn = game.get_current_turn()
-    winner = game.get_winner()
-    checkmate = game.get_is_checkmate()
-    draw = game.get_is_draw()
+    current_turn = game.current_turn
+    winner = game.winner
+    checkmate = game.is_checkmate
+    draw = game.is_draw
 
     information = {'current_turn': current_turn,
                    'winner': winner, 'checkmate': checkmate, 'draw': draw}
