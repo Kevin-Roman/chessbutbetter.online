@@ -1,7 +1,9 @@
 # Piece superclass and all the different pieces subclasses
 
-# Class for the piece type
 class Piece:
+    """Class for the piece type
+    """
+
     def __init__(self):
         self.straight = False
         self.diagonal = False
@@ -12,9 +14,6 @@ class Piece:
         self.name = " "
         self.colour = 0  # 0 = white, 1 = black
         self.value = 0
-
-    def get_all_moves(self):
-        return [self.straight, self.diagonal, self.available_moves]
 
     def __str__(self):
         if self.colour == 1:
@@ -29,8 +28,10 @@ class Piece:
         return f"{colour[0]}{name[0]}"
 
 
-# Pawn subclass which inherits all the members of the Piece class.
 class Pawn(Piece):
+    """Pawn subclass which inherits all the members of the Piece class.
+    """
+
     def __init__(self, colour):
         super().__init__()
 
@@ -48,8 +49,10 @@ class Pawn(Piece):
             self.available_moves = moves
 
 
-# Knight subclass which inherits all the members of the Piece class.
 class Knight(Piece):
+    """Knight subclass which inherits all the members of the Piece class.
+    """
+
     def __init__(self, colour):
         super().__init__()
 
@@ -64,8 +67,10 @@ class Knight(Piece):
                                 [-1, 1, -1, 1, -1]]
 
 
-# Bishop subclass which inherits all the members of the Piece class.
 class Bishop(Piece):
+    """Bishop subclass which inherits all the members of the Piece class.
+    """
+
     def __init__(self, colour):
         super().__init__()
 
@@ -75,8 +80,10 @@ class Bishop(Piece):
         self.diagonal = True
 
 
-# Rook subclass which inherits all the members of the Piece class.
 class Rook(Piece):
+    """Rook subclass which inherits all the members of the Piece class.
+    """
+
     def __init__(self, colour):
         super().__init__()
 
@@ -86,8 +93,10 @@ class Rook(Piece):
         self.straight = True
 
 
-# Queen subclass which inherits all the members of the Piece class.
 class Queen(Piece):
+    """Queen subclass which inherits all the members of the Piece class.
+    """
+
     def __init__(self, colour):
         super().__init__()
 
@@ -98,8 +107,10 @@ class Queen(Piece):
         self.diagonal = True
 
 
-# King subclass which inherits all the members of the Piece class.
 class King(Piece):
+    """King subclass which inherits all the members of the Piece class.
+    """
+
     def __init__(self, colour):
         super().__init__()
 

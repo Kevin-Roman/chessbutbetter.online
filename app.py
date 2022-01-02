@@ -180,16 +180,21 @@ def logout():
 
 # SocketIO event handlers
 
-# Function that is run after a connection is established
 @socketio.on('socket_connect')
 def connect():
-    pass
+    """Function that is run after a connection is established
+    """
     # print('connected')
 
 
-# Emits all the legal moves in dictionary format, position dictionary, and game information.
 @socketio.on('available_moves')
 def available_moves(move=None):
+    """Emits all the legal moves in dictionary format, position dictionary, and game information.
+
+    Args:
+        move (str, optional): joined string format of the move the piece will make. Defaults to None.
+    """
+
     game = deserialise(session.get('game'))
 
     if move is None:
@@ -214,9 +219,13 @@ def available_moves(move=None):
         'available_moves': available_moves_dict, 'position': game.position_dictionary(), 'information': information}, room=request.sid)
 
 
-# AI makes next move and then emits all the legal moves in dictionary format, position dictionary, and game information.
 @socketio.on('ai_moves')
 def ai_moves(player_colour):
+    """AI makes next move and then emits all the legal moves in dictionary format, position dictionary, and game information.
+
+    Args:
+        player_colour (int): player's side colour
+    """
     game = deserialise(session.get('game'))
 
     # before = time.time()

@@ -5,8 +5,17 @@ import random
 eval_position = {"P": 1, "B": 3, "N": 3, "R": 5, "Q": 9, "K": 1000}
 
 
-# Receives a piece and returns its respective value depending on type and colour
 def piece_value(piece, player_colour):
+    """Receives a piece and returns its respective value depending on type and colour
+
+    Args:
+        piece (str): piece type initial
+        player_colour (int): player's side colour
+
+    Returns:
+        int: value of the piece
+    """
+
     value = eval_position[piece.name[0]]
 
     # If the colour of the piece is the same as the player's colour then the value value is turned negative
@@ -16,8 +25,17 @@ def piece_value(piece, player_colour):
     return value
 
 
-# Calculates the total evaluation of the chessboard where a larger evaluation is better for the AI
 def evaluate(chessboard, player_colour):
+    """Calculates the total evaluation of the chessboard where a larger evaluation is better for the AI
+
+    Args:
+        chessboard (class 'chessboard.Chessboard'): instance of the Chessboard class
+        player_colour (int): player's side colour
+
+    Returns:
+        int: total evaluation value of the chessboard
+    """
+
     total_eval_value = 0
 
     # Iterates through each square
@@ -34,13 +52,35 @@ def evaluate(chessboard, player_colour):
     return total_eval_value
 
 
-# Uses the minimax algorithm to decide the best move the computer should make given the depth value given (how many moves ahead the algorithm will look at).
 def minimax(chessboard, depth, player_colour):
+    """Uses the minimax algorithm to decide the best move the computer should make given the depth value given (how many moves ahead the algorithm will look at)
+
+    Args:
+        chessboard (class 'chessboard.Chessboard'): instance of the Chessboard class
+        depth (int): the maximum depth to traverse the tree
+        player_colour (int): player's side colour
+
+    Returns:
+        tuple: tuple coorindate of the move decided by the algorithm
+    """
     return maximise(chessboard, depth, -math.inf, math.inf, player_colour, True)
 
 
-# Maximises the chessboard evaluation
 def maximise(chessboard, depth, alpha, beta, player_colour, best_move_wanted):
+    """Maximises the chessboard evaluation
+
+    Args:
+        chessboard (class 'chessboard.Chessboard'): instance of the Chessboard class
+        depth (int): the maximum depth to traverse the tree
+        alpha (int/inf): value of alpha
+        beta (int/inf): value of beta
+        player_colour (int): player's side colour
+        best_move_wanted (bool): if the move is needed to be returned by the function
+
+    Returns:
+        int/tuple: the maximum evaluation or the decided move
+    """
+
     if depth == 0:
         return evaluate(chessboard, player_colour)
 
@@ -93,8 +133,19 @@ def maximise(chessboard, depth, alpha, beta, player_colour, best_move_wanted):
     return max_eval
 
 
-# Minimises the chessboard evaluation
 def minimise(chessboard, depth, alpha, beta, player_colour):
+    """Minimises the chessboard evaluation
+
+    Args:
+        chessboard (class 'chessboard.Chessboard'): instance of the Chessboard class
+        depth (int): the maximum depth to traverse the tree
+        alpha (int/inf): value of alpha
+        beta (int/inf): value of beta
+        player_colour (int): player's side colour
+
+    Returns:
+        int: the minimum evaluation
+    """
     if depth == 0:
         return evaluate(chessboard, player_colour)
 

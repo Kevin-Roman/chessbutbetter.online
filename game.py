@@ -3,14 +3,24 @@ import jsonpickle
 from chessboard import Chessboard
 
 
-# Deserialises an instance of the Game class.
 def deserialise(serialised_object):
+    """Deserialises an instance of the Game class.
+
+    Args:
+        serialised_object (str): a serialised object
+
+    Returns:
+        class '__main__.Game': instance of the Game class
+    """
+
     return jsonpickle.decode(serialised_object)
 
 
-# Stores all the information for each instance of a chess game
-# Can be considered as an offline multiplayer game
 class Game:
+    """Stores all the information for each instance of a chess game
+    Can be considered as an offline multiplayer game
+    """
+
     def __init__(self):
         self.chess = Chessboard()
         self.current_turn = 0
@@ -24,18 +34,37 @@ class Game:
         else:
             self.current_turn = 0
 
-    # Sets the winner, checkmate, and draw attributes if game has ended
-    def end_game(self, winner_id, checkmate_or_draw):
+    def end_game(self, winner_colour, checkmate_or_draw):
+        """Sets the winner's colour, checkmate, and draw attributes if game has ended
+
+        Args:
+            winner_colour (str): colour of the winner, either "draw", "white" or "black"
+            checkmate_or_draw (str): either "checkmate" or "draw"
+        """
+
         if checkmate_or_draw == 'checkmate':
             self.is_checkmate = True
 
         elif checkmate_or_draw == 'draw':
             self.is_draw = True
 
-        self.winner = winner_id
+        self.winner = winner_colour
 
-    # Executes the legal move, and returns all the new legal_moves
-    def next_move(self, move, mutual_draw=False):
+    def next_move(self, move, mutual_draw=None):
+        """Executes the legal move, and returns all the new legal_moves
+
+        Args:
+            move (str): the move in algebraic form where the starting square,
+                            ending square, and special move number are joined together
+            mutual_draw (bool, optional): [description]. Defaults to None
+
+        Returns:
+            NoneType/dict: None if move is not legal or dictionary of all the available moves of every piece after the move was executed if move is legal
+        """
+
+        if mutual_draw is None:
+            mutual_draw = False
+
         coord1 = self.chess.notation_to_coord(move[:2])
         coord2 = self.chess.notation_to_coord(move[2:4])
 
@@ -76,8 +105,13 @@ class Game:
 
         return self.available_move_dictionary()
 
-    # Returns a dictionary containing the from and to coordinates of all legal moves
     def available_move_dictionary(self):
+        """Returns a dictionary containing the from and to coordinates of all legal moves
+
+        Returns:
+            dict: dictionary containing the from and to coordinates of all legal moves
+        """
+
         all_legal_moves = {}
 
         for num_row, row in enumerate(self.chess.chessboard):
@@ -98,6 +132,12 @@ class Game:
         return all_legal_moves
 
     def position_dictionary(self):
+        """Generates a dictionary the algebraic coordinate of where each piece is
+
+        Returns:
+            dict: dictionary where the keys are the algebriac coorindates and the values are the corresponding piece name and colours initials on that square
+        """
+
         positions = {}
 
         for num_row, row in enumerate(self.chess.chessboard):
@@ -111,8 +151,13 @@ class Game:
 
         return positions
 
-    # Serialises the instance of this class
     def serialise(self):
+        """Serialises the instance of this class
+
+        Returns:
+            str: serialised version of the object
+        """
+
         return jsonpickle.encode(self)
 
 

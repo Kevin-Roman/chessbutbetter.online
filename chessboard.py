@@ -1,8 +1,10 @@
 from pieces import Pawn, Knight, Bishop, Rook, Queen, King
 
 
-# Stores all the information for each instance of a chessboard
 class Chessboard:
+    """Stores all the information for each instance of a chessboard
+    """
+
     def __init__(self):
         self.chessboard = [
             [Rook(1), Knight(1), Bishop(1), Queen(1),
@@ -20,23 +22,43 @@ class Chessboard:
 
         self.history = []
 
-    # Gets the element of the chessboad with the specific coordinate
     def get_square(self, coord):
+        """Gets the element of the chessboad with the specific coordinate
+
+        Args:
+            coord (tuple of (int, int)): tuple containing two numbers representing the x and the y value respectively.
+
+        Returns:
+            int/class: 0 representing an empty square or an instance of a Piece type class if the square contains a piece.
+        """
         return self.chessboard[coord[1]][coord[0]]
 
-    # Sets the value/piece of the specific square on the chessboard
     def set_square(self, coord, new_value):
+        """Sets the value/piece of the specific square on the chessboard
+
+        Args:
+            coord (tuple of (int, int)): tuple containing two numbers representing the x and the y value respectively.
+            new_value (str/class): 0 or the piece object to be replaced on the selected square.
+        """
         self.chessboard[coord[1]][coord[0]] = new_value
 
-    def get_history(self):
-        return self.history
-
     def append_history(self, previous_square, new_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move):
+        """Appends data about the last move executed to the history list attribute
+
+        Args:
+            previous_square (tuple of (int, int)): tuple coordinate of the square that will be moved
+            new_square (tuple of (int, int)): tuple coordinate of the square the piece will move to
+            piece_attributes (dict): dictioanary containing attributes of the object
+            captured_piece (int/class): 0 or instance of a Piece type class
+            pawn_enpassant (NoneType/tuple of (tuple, class)): containing the coordinate and object of the pawn that was removed
+            rook_castling_move (NoneType/tuple): containing the coordinate of the square the rook moved from
+        """
         self.history.append((previous_square, new_square,
                              piece_attributes, captured_piece, pawn_enpassant, rook_castling_move))
 
-    # Undo the last move
     def undo_move(self):
+        """Undos the last move
+        """
         old_square, current_square, piece_attributes, captured_piece, pawn_enpassant, rook_castling_move = self.history.pop()
 
         self.move(current_square, old_square)
@@ -56,8 +78,16 @@ class Chessboard:
 
         self.get_square(old_square).__dict__ = piece_attributes
 
-    # Takes in two coordinates, moves the piece from the previous square to the new_square and then sets the previous square value to 0
     def move(self, previous_square, new_square):
+        """Moves a piece from one square to another and sets the initial square to empty (0)
+
+        Args:
+            previous_square (tuple of (int, int)): tuple coordinate of the square that will be moved
+            new_square (tuple of (int, int)): tuple coordinate of the square the piece will move to
+
+        Returns:
+            tuple of (dict, str/class): tuple containing dictionary of attributes of the piece object and the object itself.
+        """
         captured_piece = self.get_square(new_square)
 
         piece = self.get_square(previous_square)
@@ -70,8 +100,15 @@ class Chessboard:
 
         return moved_piece_attr, captured_piece
 
-    # Moves a piece to a different square, and takes into consideration special moves such as enpassant and castling
     def move_and_special_moves(self, coord1, coord2, special_move):
+        """Moves a piece to a different square and takes into consideration special moves such as enpassant and castling
+
+        Args:
+            coord1 (tuple of (int, int)): tuple coordinate of the square that will be moved
+            coord2 (tuple of (int, int)): tuple coordinate of the square the piece will move to
+            special_move (int): the special move type 
+        """
+
         colour = self.get_square(coord1).colour
 
         piece_attributes, captured_piece = self.move(coord1, coord2)
@@ -122,22 +159,37 @@ class Chessboard:
         self.append_history(coord1, coord2, piece_attributes, captured_piece,
                             pawn_enpassant, rook_castling_move)
 
-    # returns all the legal moves a piece can make and takes into consideration self discovered checks
-    def get_all_legal_moves(self, coord1):
-        piece1 = self.get_square(coord1)
+    def get_all_legal_moves(self, coord):
+        """Returns all the legal moves a piece can make and takes into consideration self discovered checks
+
+        Args:
+            coord (tuple of (int, int)): a tuple coordinate
+
+        Returns:
+            list of tuple: containing the coordinates the piece can move to and the special move type
+        """
+        piece1 = self.get_square(coord)
 
         legal_moves = []
 
         if piece1 != 0:
-            legal_moves.extend(self.legal_specific_move(coord1))
-            legal_moves.extend(self.legal_directional_move(coord1))
+            legal_moves.extend(self.legal_specific_move(coord))
+            legal_moves.extend(self.legal_directional_move(coord))
 
-            legal_moves = self.remove_checks(coord1, legal_moves)
+            legal_moves = self.remove_checks(coord, legal_moves)
 
         return legal_moves
 
-    # Removes the moves that would lead to a self discovered check
     def remove_checks(self, coord1, legal_moves):
+        """Removes the moves that would lead to a self discovered check
+
+        Args:
+            coord1 (tuple of (int, int)): tuple coordinate of the square that will be moved
+            legal_moves (list of tuple): containing the coordinates the piece can move to and the special move type
+
+        Returns:
+            list of tuple: containing the filtered coordinates the piece can move to and the special move type
+        """
         legal_moves_without_checks = []
         colour = self.get_square(coord1).colour
 
@@ -193,8 +245,15 @@ class Chessboard:
 
         return legal_moves_without_checks
 
-    # Checks whether the current player to move is in a checkmate or a draw
     def is_checkmate_or_draw(self, turn):
+        """Checks whether the current player to move is in a checkmate or a draw
+
+        Args:
+            turn (int): 0 or 1 representing white or black side's turn respectively
+
+        Returns:
+            str: either 'checkmate' or 'draw'
+        """
         all_legal_moves = []
 
         for num_row, row in enumerate(self.chessboard):
@@ -237,9 +296,20 @@ class Chessboard:
         return False
 
     def legal_directional_move(self, coord):
+        """Gets all the directional moves a piece can make
+
+        Args:
+            coord (tuple of (int, int)): a tuple coordinate
+
+        Returns:
+            list of tuple: containing the coordinates the piece can move to and the special move type
+        """
         square1 = self.get_square(coord)
         x, y = coord
-        straight, diagonally, _ = square1.get_all_moves()
+
+        straight = square1.straight
+        diagonal = square1.diagonal
+
         legal_moves = []
 
         direction_signs = []
@@ -247,7 +317,7 @@ class Chessboard:
         if straight:
             direction_signs.extend([(1, 0), (-1, 0), (0, 1), (0, -1)])
 
-        if diagonally:
+        if diagonal:
             direction_signs.extend([(1, 1), (1, -1), (-1, 1), (-1, -1)])
 
         for directions in direction_signs:
@@ -272,8 +342,15 @@ class Chessboard:
 
         return legal_moves
 
-    # Returns a list of legal specific moves the pawn, knight, and king can make
     def legal_specific_move(self, coord):
+        """Gets all the legal specific moves the pawn, knight, and king can make
+
+        Args:
+            coord (tuple of (int, int)): a tuple coordinate
+
+        Returns:
+            list of tuple: containing the coordinates the piece can move to and the special move type
+        """
         square1 = self.get_square(coord)
         available_moves = square1.available_moves
         x_square1, y_square1 = coord
@@ -318,9 +395,17 @@ class Chessboard:
 
         return legal_moves
 
-    # Checks if a piece can do a 'value 1' move (knight move, king single square move, and pawn single move forwards)
     @staticmethod
     def case_1(square1, square2):
+        """Checks if a piece can make a value '1' move (knight move, king single square move, and pawn single move forwards)
+
+        Args:
+            square1 (int/class): the value of a square
+            square2 (int/class): the value of a square
+
+        Returns:
+            bool: whether the move is legal or not
+        """
         if square2 == 0:
             return True
 
@@ -329,8 +414,16 @@ class Chessboard:
 
         return False
 
-    # Checks if a pawn can do a double step move
     def can_pawn_double_step(self, square, coord):
+        """Checks if a pawn can do a double step move
+
+        Args:
+            square ([type]): the value of a square
+            coord ([type]): the tuple coordinate of that square
+
+        Returns:
+            bool: whether the move is legal or not
+        """
         x, y = coord
         colour = square.colour
 
@@ -348,16 +441,32 @@ class Chessboard:
 
         return True
 
-    # Checks if a pawn can capture a piece
     def can_pawn_capture(self, square1, square2):
+        """Checks if a pawn can capture a piece
+
+        Args:
+            square1 (int/class): the value of a square
+            square2 (int/class): the value of a square
+
+        Returns:
+            bool: whether the move is legal or not
+        """
         if square2 != 0:
             if square1.colour != square2.colour:
                 return True
 
         return False
 
-    # check if a pawn can do the 'en passant' move
     def can_enpassant(self, square, coord2):
+        """Checks if a pawn can do the 'en passant' move
+
+        Args:
+            square1 (int/class): the value of a square
+            square2 (int/class): the value of a square
+
+        Returns:
+            bool: whether the move is legal or not
+        """
         history = self.history
         colour = square.colour
         x, y = coord2
@@ -384,8 +493,17 @@ class Chessboard:
 
         return False
 
-    # Checks if King can castle
     def can_castle(self, square1, coord1, coord2):
+        """Checks if King can castle
+
+        Args:
+            square1 ([type]): the value of the square the piece is being moved from
+            coord1 ([type]): the tuple coordinate of the square the piece is being moved from
+            coord2 ([type]): the tuple coordinate of the square the piece is being moved to
+
+        Returns:
+            bool: whether the move is legal or not
+        """
         x1, y1 = coord1
         x2, _ = coord2
 
@@ -412,6 +530,9 @@ class Chessboard:
         return False
 
     def __str__(self):
+        """Returns the string representation of the chessboard
+        """
+
         str_chessboard = ""
         for x in range(8):
             str_chessboard += f"{8-x}  "
@@ -427,9 +548,17 @@ class Chessboard:
 
         return str_chessboard
 
-    # converts notation format to coordinate format (e.g. from "a1" to (0,0))
     @staticmethod
     def notation_to_coord(notation):
+        """Converts algebraic notation to tuple coordinate format (e.g. from "a1" to (0,0))
+
+        Args:
+            notation (str): algebraic coordinate
+
+        Returns:
+            tuple of (int, int)): tuple coordinate
+        """
+
         x, y = list(notation)
 
         x_axis = {"a": 0, "b": 1, "c": 2, "d": 3,
@@ -437,9 +566,17 @@ class Chessboard:
 
         return (x_axis[x], 8 - int(y))
 
-    # converts notation format to coordinate format (e.g. from (0,0)  to "a1")
     @staticmethod
     def coord_to_notation(coord):
+        """Converts tuple coordinate format to algebraic notation (e.g. from (0,0)  to "a1")
+
+        Args:
+            coord (tuple of (int, int)): tuple coordinate
+
+        Returns:
+            str: algebraic coordinate
+        """
+
         # pylint: disable=unbalanced-tuple-unpacking
         x, y = list(coord)
 
