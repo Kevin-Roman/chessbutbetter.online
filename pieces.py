@@ -9,10 +9,15 @@ class Piece:
         self.diagonal = False
 
         self.already_moved = False
+
+        # list of lists representing the squares the piece can move
+        # to in relation to itself.
+        # encoding: 0 = piece, 1 = basic move, 2 = double step pawn
+        # move, 3 = pawn capturing, 4 = castling, 5 = en passant, -1 = illegal move.
         self.available_moves = []
 
         self.name = " "
-        self.colour = 0  # 0 = white, 1 = black
+        self.colour = 0  # encoding: 0 = white, 1 = black
         self.value = 0
 
     def __str__(self):
@@ -39,14 +44,16 @@ class Pawn(Piece):
         self.colour = colour
         self.value = 1
 
+        self.double_step = False
+
         moves = [[-1, 2, -1],
                  [3, 1, 3],
                  [-1, 0, -1]]
 
-        if colour == 1:
-            self.available_moves = moves[::-1]
-        else:
+        if colour == 0:
             self.available_moves = moves
+        else:
+            self.available_moves = moves[::-1]
 
 
 class Knight(Piece):
@@ -116,7 +123,7 @@ class King(Piece):
 
         self.name = "King"
         self.colour = colour
-        self.value = 100
+        self.value = 1000
 
         # A king move to a square with a 4 is only possible due to castling
         self.available_moves = [[-1, 1, 1, 1, -1],
@@ -144,5 +151,5 @@ if __name__ == "__main__":
         white_king, black_pawn, black_bishop, black_knight, black_rook, black_queen, black_king]
 
     for piece in all_pieces:
-        print(piece.name, piece.colour, piece.value,
-              piece.all_moves, piece, "\n")
+        print(piece.name, piece.colour, piece.value, piece.straight,
+              piece.diagonal, piece.available_moves, piece, "\n")

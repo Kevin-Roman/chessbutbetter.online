@@ -12,36 +12,32 @@ from flask_sqlalchemy import SQLAlchemy
 from ai import minimax
 from config import Config
 from forms import LoginForm, RegistrationForm
-from game import Game, Game_AI, deserialise
+from game import Game, Game_AI
 
-# creates the Flask instance
+# creates the Flask instance. Passes the argument __name__ which is the name of the application's module. It needs to know this in order for flask to know where to look for resourses.
 app = Flask(__name__)
 
 app.config.from_object(Config)
 
-# Flask-SQLAlchemy will not track modifications of objects and emit signals
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 # creates the SQLAlchemy object
 db = SQLAlchemy(app)
-
 app.config['SESSION_SQLALCHEMY'] = db
 
 # creates the Session object
 # Session instance is not used for direct access, flask.session is used
 Session(app)
 
+# creates the MySQL instance
 mysql = MySQL(app)
 
 # creates the Bcrypt object
-# ! does it use the secret key for hasing?
 bcrypt = Bcrypt(app)
 
 # creates the LoginManager object
 login_manager = LoginManager(app)
 
-# adds flask_socketio to the flask application
-socketio = SocketIO(app)  # ,logger=True, engineio_logger=True
+# adds Flask_SocketIO to the flask application
+socketio = SocketIO(app)
 
 # creates the initial database
 db.create_all()
@@ -76,40 +72,61 @@ def load_user(user_id):
         return User(*user[:-1])
 
 
-# Routes
+"""
+Routes
+"""
+
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    """
+    GET: Landing page: index.html
+    """
+    return render_template("index.html")
 
 
 @app.route('/play')
 def play():
+    """
+    GET: Play page: play.html
+    """
     return render_template('play.html')
 
 
 @app.route('/game-pass-and-play')
 def game_pass_and_play():
+    """
+    GET: Create instance of a chess Game, store it in session and display game-pass-and-play page
+    """
     new_game = Game()
-    session['game'] = new_game.serialise()
+    session['game'] = new_game
+
     return render_template("game_pass_and_play.html")
 
 
 @app.route('/game-ai')
 def game_ai():
+    """
+    GET: Create instance of a chess Game, store it in session and display game-ai page
+    """
+    # get the depth query parameter
     depth = request.args.get('depth')
 
-    if depth is None or not depth.isdigit or int(depth) not in [1, 2, 3, 4]:
+    if depth is None or not depth.isdigit or int(depth) not in [1, 2, 3]:
         return redirect(url_for('play'))
 
     new_game = Game_AI(int(depth))
-    session['game'] = new_game.serialise()
+    session['game'] = new_game
 
     return render_template("game_ai.html")
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    GET: Create a register form and return register page
+    POST: Hash password and add user to database
+    """
     if current_user.is_authenticated:
         return redirect(url_for('index'))
 
@@ -144,6 +161,10 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    GET: Create a login form and return login page
+    POST: Check if user exists then login in user
+    """
     if current_user.is_authenticated:
         return redirect(url_for('index'))
 
@@ -159,8 +180,6 @@ def login():
         user = curs.fetchone()
 
         curs.close()
-
-        # print(type(user), user)
 
         if user is not None and bcrypt.check_password_hash(user[5], form.password.data):
             user = load_user(user[0])
@@ -178,7 +197,10 @@ def logout():
     return redirect(url_for('index'))
 
 
-# SocketIO event handlers
+"""
+SocketIO event handlers
+"""
+
 
 @socketio.on('socket_connect')
 def connect():
@@ -192,20 +214,19 @@ def available_moves(move=None):
     """Emits all the legal moves in dictionary format, position dictionary, and game information.
 
     Args:
-        move (str, optional): joined string format of the move the piece will make. Defaults to None.
+        move (str): the starting coord, ending coord, and special moves type value joined together as a string. The coordiantes are in algebraic notation.
+        player_colour (tuple): player's colour as an integer.
     """
-
-    game = deserialise(session.get('game'))
+    # print(move, player_colour)
+    game = session.get('game')
 
     if move is None:
-        available_moves_dict = game.available_move_dictionary()
+        available_moves_dict = game.available_moves_dictionary()
     else:
-        # print(f"\n\n{move}\n\n")
+        # executes move and returns available moves dictionary
         available_moves_dict = game.next_move(move)
 
         # print(game.chess)
-
-    session['game'] = game.serialise()
 
     current_turn = game.current_turn
     winner = game.winner
@@ -226,7 +247,7 @@ def ai_moves(player_colour):
     Args:
         player_colour (int): player's side colour
     """
-    game = deserialise(session.get('game'))
+    game = session.get('game')
 
     # before = time.time()
     ai_move = choice(minimax(game.chess, game.depth, player_colour))
@@ -242,9 +263,9 @@ def ai_moves(player_colour):
     # make that move
     game.next_move(ai_source + ai_target + ai_special_move)
 
-    session['game'] = game.serialise()
+    # print(f"TURN: {game.current_turn}")
 
-    available_moves_dict = game.available_move_dictionary()
+    available_moves_dict = game.available_moves_dictionary()
 
     current_turn = game.current_turn
     winner = game.winner

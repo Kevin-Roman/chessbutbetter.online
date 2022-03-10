@@ -43,7 +43,7 @@
     let checkmate = false
     let draw = false
     let turn = 0
-    let legalMoves = {}
+    let legalMoves = null
 
     let playerOrientation
 
@@ -69,28 +69,6 @@
       }
     }
 
-    socket.on('available_moves_response', ({available_moves, position, information}) => {
-      board.position(position)
-
-      legalMoves = available_moves
-
-      turn = information['current_turn']
-      winner = information['winner']
-      checkmate = information['checkmate']
-      draw = information['draw']
-      // console.log(winner, checkmate, draw)
-
-      if (checkmate) {
-        displayWinner('Checkmate', winner)
-      } else if (draw) {
-        displayWinner('Stalemate', winner)
-      } else if (turn !== playerColour) {
-        socket.emit('ai_moves', playerColour)
-      }
-
-      // console.log('available_moves_response')
-    })
-
     const removeHighlightedSquares = () => {
       $('#myBoard .square-55d63').css('background', '')
     }
@@ -106,7 +84,49 @@
       $square.css('background', background)
     }
 
-    const onDragStart = (source, piece, position, orientation) => { // console.log('onDragStart') console.log(piece) do not pick up pieces if the game is over
+    /**
+     * Receives information about the available_moves of each piece on the chessboard, information about the positions of every piece on the chessboard, and information about the current game state
+     * @param {obj} available_moves
+     * @param {object} position
+     * @param {object} information
+     */
+    socket.on('available_moves_response', ({available_moves, position, information}) => { // console.log('available_moves_response')
+
+      board.position(position)
+
+      legalMoves = available_moves
+
+      turn = information['current_turn']
+      // console.log('turn: ', turn)
+      winner = information['winner']
+      // console.log('winner: ', winner)
+      checkmate = information['checkmate']
+      // console.log('checkmate: ', checkmate)
+      draw = information['draw']
+      // console.log('draw: ', draw)
+
+      if (checkmate) {
+        displayWinner('Checkmate', winner)
+      } else if (draw) {
+        displayWinner('Stalemate', winner)
+      } else if (turn !== playerColour) {
+        socket.emit('ai_moves', playerColour)
+      }
+
+    })
+
+    /**
+     * Validates if the piece can be dragged
+     * @param {str} source - the starting position of the piece, e.g. "d2"
+     * @param {str} piece - the piece, e.g. "wP"
+     * @param {obj} position - object containing positions of all the pieces
+     * @param {str} orientation - 'white' or 'black'
+     * @return {bool} - whether to allow the piece to be dragged or not
+     */
+    const onDragStart = (source, piece, position, orientation) => {
+      // console.log('onDragStart')
+
+      // do not pick up pieces if the game is over
       if (winner != null || checkmate || draw) {
         return false
       }
@@ -116,39 +136,29 @@
         return false
       }
 
-      // only pick up pieces for the side to move
-      if ((playerColour === 0 && piece.search(/^b/) !== -1) || (playerColour === 1 && piece.search(/^w/) !== -1)) {
+      // only pick up pieces if it's the player's turn and the piece is of same colour as the player
+      if ((playerColour === 0 && piece.search(/^b/) !== -1) || (playerColour === 1 && piece.search(/^w/) !== -1)) { // ! change later to false
         return false
       }
 
       onMouseoverSquare(source, piece)
     }
 
-    const onDrop = (source, target) => {
-      onMouseoutSquare()
-      // console.log('onDrop')
-
-      // gets the coordinate part of the string
-      const onlyLegalCoordinates = legalMoves[source].map((v) => v.slice(0, 2))
-
-      const indexOfMove = onlyLegalCoordinates.indexOf(target)
-
-      // only place if move is legal
-      if (indexOfMove === -1) {
-        return 'snapback'
-      } else { // joins the string variable source with the square and special move its moving to console.log('emit available_moves')
-        socket.emit('available_moves', source.concat(legalMoves[source][indexOfMove]))
-      }
-    }
-
+    /**
+     * Highlights the legal moves of a piece that is being hovered over with the cursor.
+     * @param {str} square - the coordinate of the piece e.g. "d2"
+     * @param {str} piece - the piece, e.g. "wP"
+     * @return {undefined}
+     */
     const onMouseoverSquare = (square, piece) => {
       // console.log('onMouseoverSquare')
 
-      // do not pick highlight pieces if the game is over
+      // do not highlight pieces if the game has ended
       if (winner != null || checkmate || draw) {
         return
       }
 
+      // return undefined if piece has no legal moves
       if (! legalMoves[square]) {
         return
       }
@@ -164,21 +174,58 @@
       }
 
       // gets the coordinate part of the string
-      const onlyLegalMoves = legalMoves[square].map((v) => v.slice(0, 2))
+      const onlyLegalCoordinates = legalMoves[square].map((v) => v.slice(0, 2))
 
       // exit if theres are no moves available for this square
-      if (onlyLegalMoves.length === 0) {
+      if (onlyLegalCoordinates.length === 0) {
         return
       }
+
       // highlight the square they moused over
       highlightSquare(square)
 
       // highlight the possible squares for this piece
-      for (let i = 0; i < onlyLegalMoves.length; i++) {
-        highlightSquare(onlyLegalMoves[i])
+      for (let i = 0; i < onlyLegalCoordinates.length; i++) {
+        highlightSquare(onlyLegalCoordinates[i])
       }
     }
 
+    /**
+     * Validates if the piece can be dropped to the given square
+     * @param {str} source - the starting position of the piece, e.g. "d2"
+     * @param {str} target - the ending position of the piece
+     * @return {undefined/str} - if 'snapback' is returned, the piece will snap back into its starting position
+     */
+    const onDrop = (source, target) => {
+      onMouseoutSquare()
+
+      // console.log('onDrop')
+
+      // see if the move is legal
+      if (legalMoves.length === 0) {
+        return 'snapback'
+      }
+
+      // gets the coordinate part of the string
+      onlyLegalCoordinates = legalMoves[source].map((v) => v.slice(0, 2))
+
+      // if the target square is a legal move
+      indexOfMove = onlyLegalCoordinates.indexOf(target)
+
+      if (indexOfMove === -1) {
+        return 'snapback'
+      } else { // joins the string variable source with the square and special move its moving to console.log('emit')
+
+        socket.emit('available_moves', source.concat(legalMoves[source][indexOfMove]))
+      }
+    }
+
+    /**
+     * Return all highlighted squares back to their original colour
+     * @param {str} square - the coordinate of the piece e.g. "d2"
+     * @param {str} piece - the piece, e.g. "wP"
+     * @return {undefined}
+     */
     const onMouseoutSquare = (square, piece) => { // console.log('onMouseoutSquare')
       removeHighlightedSquares()
     }
@@ -189,16 +236,19 @@
       position: 'start',
       onDragStart: onDragStart,
       onDrop: onDrop,
-      onMouseoutSquare: onMouseoutSquare,
-      onMouseoverSquare: onMouseoverSquare
+      onMouseoverSquare: onMouseoverSquare,
+      onMouseoutSquare: onMouseoutSquare
     }
+
+    // Initialises the chessboard on the browser
     board = Chessboard('myBoard', config)
 
     board.resize()
 
-    if (playerColour === 0) {
+
+    if (playerColour === 0) { // console.log('available_moves')
       socket.emit('available_moves')
-    } else {
+    } else { // console.log('ai_moves')
       socket.emit('ai_moves', playerColour)
     }
 

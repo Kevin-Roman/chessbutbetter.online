@@ -1,19 +1,4 @@
-import jsonpickle
-
 from chessboard import Chessboard
-
-
-def deserialise(serialised_object):
-    """Deserialises an instance of the Game class.
-
-    Args:
-        serialised_object (str): a serialised object
-
-    Returns:
-        class '__main__.Game': instance of the Game class
-    """
-
-    return jsonpickle.decode(serialised_object)
 
 
 class Game:
@@ -23,8 +8,9 @@ class Game:
 
     def __init__(self):
         self.chess = Chessboard()
+        # colour of the current turn (0 = white, 1 = black)
         self.current_turn = 0
-        self.winner = None
+        self.winner = None  # colour of winner or "draw"
         self.is_checkmate = False
         self.is_draw = False
 
@@ -38,7 +24,7 @@ class Game:
         """Sets the winner's colour, checkmate, and draw attributes if game has ended
 
         Args:
-            winner_colour (str): colour of the winner, either "draw", "white" or "black"
+            winner_colour (int/str): integer colour of the winner or "draw"
             checkmate_or_draw (str): either "checkmate" or "draw"
         """
 
@@ -54,9 +40,8 @@ class Game:
         """Executes the legal move, and returns all the new legal_moves
 
         Args:
-            move (str): the move in algebraic form where the starting square,
-                            ending square, and special move number are joined together
-            mutual_draw (bool, optional): [description]. Defaults to None
+            move (str): the move in algebraic notation form where the starting square, ending square, and special move number are joined together. e.g. "a2a32", a2 = start_coord, a3 = end_coord, 2 = special move type.
+            mutual_draw (bool, optional): Defaults to None.
 
         Returns:
             NoneType/dict: None if move is not legal or dictionary of all the available moves of every piece after the move was executed if move is legal
@@ -65,20 +50,21 @@ class Game:
         if mutual_draw is None:
             mutual_draw = False
 
-        coord1 = self.chess.notation_to_coord(move[:2])
-        coord2 = self.chess.notation_to_coord(move[2:4])
+        start_coord = self.chess.notation_to_coord(move[:2])
+        end_coord = self.chess.notation_to_coord(move[2:4])
 
-        # The string variable 'move' could have a 5th character which represents the special move
+        # The string variable 'move' could have a 5th character which represents the special move.
+        # If its only 4 characters long then special move type is equal to None
         if len(move) == 4:
             special_move = None
         else:
             special_move = int(move[-1])
 
         # If the move is legal, make the move, and add it to the history of moves
-        if coord2 in [legal_move[0] for legal_move in self.chess.get_all_legal_moves(coord1)]:
-            # print(self.chess.get_all_legal_moves(
-            #     coord1), coord2 + str(special_move))
-            self.chess.move_and_special_moves(coord1, coord2, special_move)
+        if end_coord in [legal_move[0] for legal_move in self.chess.get_legal_moves(start_coord)]:
+            self.chess.move_and_special_moves(
+                start_coord, end_coord, special_move)
+            # once move is executed, change the turn
             self.change_current_turn()
         else:
             return None
@@ -90,6 +76,7 @@ class Game:
         # print(self.current_turn, str(is_checkmate_or_draw))
 
         if is_checkmate_or_draw:
+            # If it is checkmate or draw, the winner is the opponent
             if self.current_turn == 0:
                 winner_colour = 1
             else:
@@ -103,31 +90,35 @@ class Game:
             self.end_game('draw', 'draw')
             return None
 
-        return self.available_move_dictionary()
+        return self.available_moves_dictionary()
 
-    def available_move_dictionary(self):
-        """Returns a dictionary containing the from and to coordinates of all legal moves
+    def available_moves_dictionary(self):
+        """Returns a dictionary containing the start and end coordinates of all legal moves
 
         Returns:
             dict: dictionary containing the from and to coordinates of all legal moves
         """
 
-        all_legal_moves = {}
+        all_legal_moves = {}  # {"a1": [], "a2": ["a31", "a42"], ...}
 
         for num_row, row in enumerate(self.chess.chessboard):
             for num_column, _ in enumerate(row):
                 coord = (num_column, num_row)
                 square = self.chess.get_square(coord)
+
+                # if square is not empty
                 if square != 0:
 
-                    legal_moves_and_special_moves = self.chess.get_all_legal_moves(
+                    legal_moves = self.chess.get_legal_moves(
                         coord)
 
-                    legal_moves_and_special_moves = [
-                        self.chess.coord_to_notation(lm) + str((sm or '')) for lm, sm in legal_moves_and_special_moves]
+                    # converts each legal move to string format and adds the special move type number to the end of the string
+                    legal_moves_string = [
+                        self.chess.coord_to_notation(coord) + str((special_move or '')) for coord, special_move in legal_moves
+                    ]
 
                     all_legal_moves[self.chess.coord_to_notation(
-                        coord)] = legal_moves_and_special_moves
+                        coord)] = legal_moves_string
 
         return all_legal_moves
 
@@ -151,30 +142,20 @@ class Game:
 
         return positions
 
-    def serialise(self):
-        """Serialises the instance of this class
-
-        Returns:
-            str: serialised version of the object
-        """
-
-        return jsonpickle.encode(self)
-
 
 class Game_AI(Game):
     def __init__(self, depth):
+        # initialises the attributes of the superclass
         super().__init__()
 
-        self._depth = depth
-
-    def get_depth(self):
-        return self._depth
+        self.depth = depth
 
 
 if __name__ == "__main__":
     game = Game()
     print(game.chess)
 
+    # executes the move and then prints out the availables moves
     print(game.next_move("b1a3"))
 
     print(game.chess)
@@ -183,5 +164,3 @@ if __name__ == "__main__":
     print(game.winner, game.is_checkmate)
     game.end_game(2, 'draw')
     print(game.winner, game.is_draw)
-
-    print(game.position_dictionary())

@@ -8,19 +8,18 @@
     <img
       src="../static/custom/img/titles/create_account.svg"
       alt="name of the website which is chess but better"
-      class="mb-5"
-      width="70%"
+      class="mb-1"
+      width="60%"
       draggable="false"/> <form
-      method="POST" action="" class="container form-section mb-3 w-75">
+      method="POST" action="" class="container form-section" style="width: 40vw;">
       <!-- hidden_tag() adds a CSRF token which adds protection -->
       {{ form.hidden_tag() }}
       <fieldset class="text-start">
-        <div class="mb-3 d-flex flex-row">
-          <div>
+        <div class="mb-3 d-flex justify-content-between flex-row">
+          <div class="w-100">
             {{ form.firstname.label(class="form-label fw-bold") }}
 
-            {% if form.firstname.errors %}
-              {{ form.firstname(class="form-control form-control-lg is-invalid") }}
+            {% if form.firstname.errors %}` {{ form.firstname(class="form-control form-control-lg is-invalid") }}
               <div class="invalid-feedback">
                 {% for error in form.firstname.errors %}
                   <span>{{ error }}</span>
@@ -30,7 +29,7 @@
               {{ form.firstname(class="form-control form-control-lg") }}
             {% endif %}
           </div>
-          <div>
+          <div class="w-100">
             {{ form.surname.label(class="form-label fw-bold") }}
 
             {% if form.surname.errors %}
@@ -73,8 +72,8 @@
             {{ form.email(class="form-control form-control-lg") }}
           {% endif %}
         </div>
-        <div class="mb-3 d-flex flex-row">
-          <div>
+        <div class="mb-3 d-flex justify-content-between flex-row">
+          <div class="w-100">
             {{ form.password.label(class="form-label fw-bold") }}
 
             {% if form.password.errors %}
@@ -88,7 +87,7 @@
               {{ form.password(class="form-control form-control-lg") }}
             {% endif %}
           </div>
-          <div>
+          <div class="w-100">
             {{ form.confirm_password.label(class="form-label fw-bold") }}
 
             {% if form.confirm_password.errors %}
@@ -105,14 +104,12 @@
 
         </div>
       </fieldset>
-      <div>{{ form.submit(class="btn btn-outline-dark btn-lg fw-bold mb-3 px-5") }}</div>
+      <div>{{ form.submit(class="btn btn-outline-dark btn-lg fw-bold mb-1 px-5") }}</div>
+      <small class="text-muted">
+        Already have an account?
+        <a href="{{ url_for('login') }}" class="text-decoration-none fw-bold">Login here!</a>
+      </small>
     </form>
-  </div>
-  <div>
-    <!-- Name of the function 'login' not the route -->
-    <small class="text-muted">
-      Already have an account?
-      <a href="{{ url_for('login') }}" class="text-decoration-none fw-bold">Login here!</a>
-    </small>
+
   </div>
 {% endblock content %}

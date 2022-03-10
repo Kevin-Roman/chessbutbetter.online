@@ -4,6 +4,7 @@
     body {
       background-image: url('../static/custom/img/background.svg');
       background-position: center;
+      background-attachment: fixed;
       background-repeat: no-repeat;
       background-size: cover;
     }
@@ -24,7 +25,7 @@
       <img src="../static/custom/img/chessboard.svg" class="img-fluid" alt="chessboard" draggable="false"/>
     </div>
     <div class="container center-v">
-      <a href="{{ url_for('play') }}" class="btn btn-outline-dark btn-xlarge fw-bold">Play Now!</a>
+      <a href="{{ url_for('play') }}" class="btn btn-outline-dark btn-xlarge fw-bold mb-2">Play Now!</a>
     </div>
   </div>
 
