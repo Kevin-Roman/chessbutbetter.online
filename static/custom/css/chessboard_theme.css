@@ -1,0 +1,15 @@
+/* Chessboard js modifications */
+.board-b72b1 {
+    border: 20px solid #07738b;
+    box-sizing: content-box;
+  }
+
+  .white-1e1d7 {
+    background-color: #fff;
+    color: #07738b;
+  }
+
+  .black-3c85d {
+    background-color: #07738b;
+    color: #fff;
+  }

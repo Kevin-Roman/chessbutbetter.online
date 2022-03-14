@@ -8,12 +8,22 @@
       display: none;
     }
   </style>
-  <link rel="stylesheet" href="{{ url_for('static', filename='chessboardjs-1.0.0/css/chessboard-1.0.0.css') }}"/>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.css"
+    integrity="sha512-KRrFrm+GAPOl6xxootmuQHKDoGiR2Gtifqd6XFUH++sluyhWui3vJCkmt0FN0k/H9TQn0f4sZFltC+XnQAKKvQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+  <link rel="stylesheet" href="../static/custom/css/chessboard_theme.css"/>
   <script
     src="https://code.jquery.com/jquery-3.6.0.min.js"
     integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
     crossorigin="anonymous"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='chessboardjs-1.0.0/js/chessboard-1.0.0.js') }}"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.js"
+    integrity="sha512-TGU/O51undmqzEuGui6G+td333I3Wufy17Foi8O5TUc4z9rSJg+IpGmRCnLl5s0MUycrdj7vpD6YMsbRppVVzw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
 {% endblock %}
 {% block chessboard %}
 
@@ -122,7 +132,7 @@
      * @return {undefined}
      */
     const onMouseoverSquare = (square, piece) => {
-      // console.log('onMouseoverSquare')
+      console.log('onMouseoverSquare')
 
       // do not highlight pieces if the game has ended
       if (winner != null || checkmate || draw) {
@@ -201,7 +211,8 @@
       onDragStart: onDragStart,
       onDrop: onDrop,
       onMouseoverSquare: onMouseoverSquare,
-      onMouseoutSquare: onMouseoutSquare
+      onMouseoutSquare: onMouseoutSquare,
+      pieceTheme: "static/chessboardjs-1.0.0/img/chesspieces/{piece}.svg"
     }
 
     // Initialises the chessboard on the browser
