@@ -27,7 +27,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Kevin-Roman/chessbutbetter.online">
-    <!-- <img src="images/logo.png" alt="Logo" width="80" height="80"> -->
+    <img src="static/custom/img/favicon.ico" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Chess AI Web Game</h3>
@@ -59,7 +59,6 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#bibliography">Bibliography</a></li>
   </ol>
@@ -70,7 +69,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
+[![Product Name Screen Shot][product-screenshot]](http://www.chessbutbetter.online)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -99,16 +98,6 @@ Instructions on setting up the project
 4. Post the code to the heroku project either through Github or the HerokuCLI
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- USAGE EXAMPLES -->
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- LICENSE -->
 ## License
@@ -234,7 +223,7 @@ Distributed under the MIT License. See `LICENSE.md` for more information.
 [license-url]: https://github.com/Kevin-Roman/chessbutbetter.online/blob/main/LICENSE.md
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/kevin-i-roman
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: static/custom/img/chessboard.svg
 [Flask]: https://img.shields.io/badge/Flask-FFFFFF?style=for-the-badge&logo=Flask&logoColor=black
 [Flask-url]: https://flask.palletsprojects.com/en/2.2.x/
 [Socket.io]: https://img.shields.io/badge/Socket.io-000000?style=for-the-badge&logo=socket.io&logoColor=white
