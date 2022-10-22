@@ -77,6 +77,10 @@
 
 ### Built With
 
+* [![Python][Python]][Python-url]
+* [![JavaScript][JavaScript]][JavaScript-url]
+* ![Jinja][Jinja]
+* ![CSS][CSS]
 * [![Flask][Flask]][Flask-url]
 * [![Socket.io][Socket.io]][Socket.io-url]
 
@@ -224,9 +228,13 @@ Distributed under the MIT License. See `LICENSE.md` for more information.
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/kevin-i-roman
 [product-screenshot]: static/custom/img/chessboard.svg
+[Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python-url]: https://www.python.org/
+[JavaScript]: https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
+[JavaScript-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+[Jinja]: https://img.shields.io/badge/jinja-white.svg?style=for-the-badge&logo=jinja&logoColor=black
+[CSS]: https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white
 [Flask]: https://img.shields.io/badge/Flask-FFFFFF?style=for-the-badge&logo=Flask&logoColor=black
 [Flask-url]: https://flask.palletsprojects.com/en/2.2.x/
 [Socket.io]: https://img.shields.io/badge/Socket.io-000000?style=for-the-badge&logo=socket.io&logoColor=white
 [Socket.io-url]: https://socket.io/
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
